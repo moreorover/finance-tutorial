@@ -1,4 +1,6 @@
 {
+  "id": "df8cf3e8-8791-4153-8c4c-663599534d2e",
+  "prevId": "afb2c0a0-f84e-4912-989f-acc614576ac6",
   "version": "6",
   "dialect": "postgresql",
   "tables": {
@@ -14,6 +16,12 @@
         },
         "name": {
           "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_name": {
+          "name": "last_name",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -34,10 +42,8 @@
   "enums": {},
   "schemas": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
-  },
-  "id": "afb2c0a0-f84e-4912-989f-acc614576ac6",
-  "prevId": "00000000-0000-0000-0000-000000000000"
+    "tables": {}
+  }
 }
