@@ -15,6 +15,13 @@
       "when": 1715806716141,
       "tag": "0001_nebulous_killer_shrike",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1716061792817,
+      "tag": "0002_sour_miek",
+      "breakpoints": true
     }
   ]
 }
