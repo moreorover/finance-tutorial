@@ -22,8 +22,8 @@ const app = new Hono()
         name: accounts.name,
         lastName: accounts.lastName,
       })
-      .from(accounts)
-      .where(eq(accounts.userId, auth.userId));
+      .from(accounts);
+    // .where(eq(accounts.userId, auth.userId));
 
     return c.json({ data });
   })
@@ -50,7 +50,7 @@ const app = new Hono()
           lastName: accounts.lastName,
         })
         .from(accounts)
-        .where(and(eq(accounts.userId, auth.userId), eq(accounts.id, id)));
+        .where(eq(accounts.id, id));
 
       if (!data) {
         return c.json({ error: "Not found" }, 404);
@@ -77,7 +77,7 @@ const app = new Hono()
         .insert(accounts)
         .values({
           id: createId(),
-          userId: auth.userId,
+          createdBy: auth.userId,
           ...values,
         })
         .returning();
@@ -100,10 +100,8 @@ const app = new Hono()
       const data = await db
         .delete(accounts)
         .where(
-          and(
-            eq(accounts.userId, auth.userId),
-            inArray(accounts.id, values.ids)
-          )
+          // eq(accounts.userId, auth.userId),
+          inArray(accounts.id, values.ids)
         )
         .returning({ id: accounts.id });
 
@@ -142,7 +140,7 @@ const app = new Hono()
       const [data] = await db
         .update(accounts)
         .set(values)
-        .where(and(eq(accounts.userId, auth.userId), eq(accounts.id, id)))
+        .where(eq(accounts.id, id))
         .returning();
 
       if (!data) {
@@ -170,7 +168,8 @@ const app = new Hono()
 
       const [data] = await db
         .delete(accounts)
-        .where(and(eq(accounts.userId, auth.userId), eq(accounts.id, id)))
+        .where(eq(accounts.id, id))
+        // .where(and(eq(accounts.userId, auth.userId), eq(accounts.id, id)))
         .returning({ id: accounts.id });
 
       if (!data) {
