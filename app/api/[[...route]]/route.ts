@@ -1,7 +1,7 @@
 import { Hono } from "hono";
-import accounts from "./accounts";
 import { handle } from "hono/vercel";
 import { HTTPException } from "hono/http-exception";
+import accounts from "./accounts";
 
 export const runtime = "edge";
 

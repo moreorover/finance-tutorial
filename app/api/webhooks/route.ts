@@ -1,9 +1,8 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
-import { WebhookEvent, clerkClient } from "@clerk/nextjs/server";
+import { WebhookEvent } from "@clerk/nextjs/server";
 import { db } from "@/db/drizzle";
 import { users } from "@/db/schema";
-import { createId } from "@paralleldrive/cuid2";
 import { eq, or } from "drizzle-orm";
 
 export async function POST(req: Request) {
@@ -126,7 +125,34 @@ export async function POST(req: Request) {
     console.log(`Processed webhook ${eventType}`);
   }
 
-  if (eventType != "user.created" && eventType != "user.updated") {
+  if (eventType == "user.deleted") {
+    console.log(`Processing webhook ${eventType}`);
+    const { id } = evt.data;
+
+    if (!id) {
+      return new Response("ID not received.", { status: 404 });
+    }
+
+    const [data] = await db
+      .update(users)
+      .set({
+        deleted: true,
+      })
+      .where(eq(users.id, id))
+      .returning();
+
+    if (!data) {
+      return new Response("", { status: 404 });
+    }
+
+    console.log(`Processed webhook ${eventType}`);
+  }
+
+  if (
+    eventType != "user.created" &&
+    eventType != "user.updated" &&
+    eventType != "user.deleted"
+  ) {
     console.log(`Skipping webhook ${eventType}`);
   }
   return new Response("", { status: 200 });

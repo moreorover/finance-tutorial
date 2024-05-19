@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { insertAccountSchema } from "@/db/schema";
+import { insertAccountsSchema } from "@/db/schema";
 import {
   Form,
   FormControl,
@@ -14,9 +14,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-const formSchema = insertAccountSchema.pick({
-  name: true,
-  lastName: true,
+const formSchema = insertAccountsSchema.pick({
+  fullName: true,
+  instagram: true,
+  emailAddress: true,
+  phoneNumber: true,
 });
 
 type FormValues = z.input<typeof formSchema>;
@@ -55,26 +57,62 @@ export const AccountForm = ({
         className="space-y-4 pt-4"
       >
         <FormField
-          name="name"
+          name="fullName"
           control={form.control}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input disabled={disabled} placeholder="Name" {...field} />
+                <Input disabled={disabled} placeholder="Full name" {...field} />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
         <FormField
-          name="lastName"
+          name="instagram"
           control={form.control}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Last Name</FormLabel>
               <FormControl>
-                <Input disabled={disabled} placeholder="Last Name" {...field} />
+                <Input disabled={disabled} placeholder="Instagram" {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          name="emailAddress"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email address</FormLabel>
+              <FormControl>
+                <Input
+                  disabled={disabled}
+                  placeholder="Email address"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          name="phoneNumber"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone number</FormLabel>
+              <FormControl>
+                <Input
+                  disabled={disabled}
+                  placeholder="Phone number"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />

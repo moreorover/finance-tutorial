@@ -6,24 +6,26 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { AccountForm } from "./account-form";
-import { insertAccountSchema } from "@/db/schema";
+import { insertAccountsSchema } from "@/db/schema";
 import { z } from "zod";
-import { useOpenAccount } from "../hooks/use-open-account";
+import { useOpenAccounts } from "../hooks/use-open-account";
 import { useGetAccount } from "../api/use-get-account";
 import { Loader2 } from "lucide-react";
 import { useEditAccount } from "../api/use-edit-account";
 import { useDeleteAccount } from "../api/use-delete-account";
 import { useConfirm } from "@/hooks/use-confirm";
 
-const formSchema = insertAccountSchema.pick({
-  name: true,
-  lastName: true,
+const formSchema = insertAccountsSchema.pick({
+  fullName: true,
+  instagram: true,
+  emailAddress: true,
+  phoneNumber: true,
 });
 
 type FormValues = z.input<typeof formSchema>;
 
 export const EditAccountSheet = () => {
-  const { isOpen, onClose, id } = useOpenAccount();
+  const { isOpen, onClose, id } = useOpenAccounts();
 
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
@@ -57,12 +59,16 @@ export const EditAccountSheet = () => {
 
   const defaultValues = accountQuery.data
     ? {
-        name: accountQuery.data.name,
-        lastName: accountQuery.data.lastName,
+        fullName: accountQuery.data.fullName,
+        instagram: accountQuery.data.instagram,
+        emailAddress: accountQuery.data.emailAddress,
+        phoneNumber: accountQuery.data.phoneNumber,
       }
     : {
-        name: "",
-        lastName: "",
+        fullName: "",
+        instagram: "",
+        emailAddress: "",
+        phoneNumber: "",
       };
 
   return (

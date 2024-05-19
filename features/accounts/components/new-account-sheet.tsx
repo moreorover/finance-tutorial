@@ -5,21 +5,23 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useNewAccount } from "@/features/accounts/hooks/use-new-account";
+import * as useNewAccount from "@/features/accounts/hooks/use-new-account";
 import { AccountForm } from "./account-form";
-import { insertAccountSchema } from "@/db/schema";
+import { insertAccountsSchema } from "@/db/schema";
 import { z } from "zod";
 import { useCreateAccount } from "@/features/accounts/api/use-create-account";
 
-const formSchema = insertAccountSchema.pick({
-  name: true,
-  lastName: true,
+const formSchema = insertAccountsSchema.pick({
+  fullName: true,
+  instagram: true,
+  emailAddress: true,
+  phoneNumber: true,
 });
 
 type FormValues = z.input<typeof formSchema>;
 
 export const NewAccountSheet = () => {
-  const { isOpen, onClose } = useNewAccount();
+  const { isOpen, onClose } = useNewAccount.useNewAccounts();
   const mutation = useCreateAccount();
   const onSubmit = (values: FormValues) => {
     mutation.mutate(values, {
@@ -37,8 +39,13 @@ export const NewAccountSheet = () => {
         </SheetHeader>
         <AccountForm
           onSubmit={onSubmit}
-          disabled={false}
-          defaultValues={{ name: "", lastName: "" }}
+          disabled={mutation.isPending}
+          defaultValues={{
+            fullName: "",
+            instagram: "",
+            emailAddress: "",
+            phoneNumber: "",
+          }}
         />
       </SheetContent>
     </Sheet>

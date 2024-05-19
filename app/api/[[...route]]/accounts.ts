@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 
 import { db } from "@/db/drizzle";
-import { accounts, insertAccountSchema } from "@/db/schema";
+import { accounts, insertAccountsSchema } from "@/db/schema";
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
-import { and, eq, inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
 import { createId } from "@paralleldrive/cuid2";
 import { z } from "zod";
@@ -19,8 +19,10 @@ const app = new Hono()
     const data = await db
       .select({
         id: accounts.id,
-        name: accounts.name,
-        lastName: accounts.lastName,
+        fullName: accounts.fullName,
+        instagram: accounts.instagram,
+        emailAddress: accounts.emailAddress,
+        phoneNumber: accounts.phoneNumber,
       })
       .from(accounts);
     // .where(eq(accounts.userId, auth.userId));
@@ -46,8 +48,10 @@ const app = new Hono()
       const [data] = await db
         .select({
           id: accounts.id,
-          name: accounts.name,
-          lastName: accounts.lastName,
+          fullName: accounts.fullName,
+          instagram: accounts.instagram,
+          emailAddress: accounts.emailAddress,
+          phoneNumber: accounts.phoneNumber,
         })
         .from(accounts)
         .where(eq(accounts.id, id));
@@ -63,7 +67,12 @@ const app = new Hono()
     clerkMiddleware(),
     zValidator(
       "json",
-      insertAccountSchema.pick({ name: true, lastName: true })
+      insertAccountsSchema.pick({
+        fullName: true,
+        instagram: true,
+        emailAddress: true,
+        phoneNumber: true,
+      })
     ),
     async (c) => {
       const auth = getAuth(c);
@@ -119,9 +128,11 @@ const app = new Hono()
     ),
     zValidator(
       "json",
-      insertAccountSchema.pick({
-        name: true,
-        lastName: true,
+      insertAccountsSchema.pick({
+        fullName: true,
+        instagram: true,
+        emailAddress: true,
+        phoneNumber: true,
       })
     ),
     async (c) => {
@@ -139,7 +150,7 @@ const app = new Hono()
 
       const [data] = await db
         .update(accounts)
-        .set(values)
+        .set({ updatedBy: auth.userId, ...values })
         .where(eq(accounts.id, id))
         .returning();
 

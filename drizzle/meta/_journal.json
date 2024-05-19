@@ -1,26 +1,12 @@
 {
-  "version": "5",
-  "dialect": "pg",
+  "version": "6",
+  "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1715805014460,
-      "tag": "0000_hard_mach_iv",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
       "version": "6",
-      "when": 1715806716141,
-      "tag": "0001_nebulous_killer_shrike",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1716061792817,
-      "tag": "0002_sour_miek",
+      "when": 1716131427232,
+      "tag": "0000_slim_jamie_braddock",
       "breakpoints": true
     }
   ]

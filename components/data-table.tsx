@@ -30,6 +30,7 @@ import { useConfirm } from "@/hooks/use-confirm";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  filterLabel: string;
   filterKey: string;
   onDelete: (rows: Row<TData>[]) => void;
   disabled?: boolean;
@@ -38,6 +39,7 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   data,
+  filterLabel,
   filterKey,
   onDelete,
   disabled,
@@ -73,7 +75,7 @@ export function DataTable<TData, TValue>({
       <ConfirmDialog />
       <div className="flex items-center py-4">
         <Input
-          placeholder={`Filter ${filterKey}...`}
+          placeholder={`Filter ${filterLabel}...`}
           value={(table.getColumn(filterKey)?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn(filterKey)?.setFilterValue(event.target.value)
