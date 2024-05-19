@@ -25,7 +25,7 @@ export const accounts = pgTable("accounts", {
 });
 
 export const insertAccountsSchema = createInsertSchema(accounts, {
-  emailAddress: z.union([z.literal(""), z.string().email()]),
+  // emailAddress: z.union([z.literal(""), z.string().email()]),
 });
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -38,3 +38,19 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const accountTags = pgTable("account_tags", {
+  id: text("id").primaryKey(),
+  title: text("title").unique().notNull(),
+});
+
+export const insertAccountTagSchema = createInsertSchema(accountTags);
+
+export const accountToTags = pgTable("accountsToTags", {
+  accountId: text("account_id")
+    .notNull()
+    .references(() => accounts.id),
+  tagId: text("tag_id")
+    .notNull()
+    .references(() => accountTags.id),
+});

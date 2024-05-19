@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { handle } from "hono/vercel";
 import { HTTPException } from "hono/http-exception";
 import accounts from "./accounts";
+import accountTags from "./accountTags";
 
 export const runtime = "edge";
 
@@ -15,7 +16,9 @@ app.onError((err, c) => {
   return c.json({ error: "Internal error" }, 500);
 });
 
-const routes = app.route("/accounts", accounts);
+const routes = app
+  .route("/accounts", accounts)
+  .route("/accountTags", accountTags);
 
 export const GET = handle(app);
 export const POST = handle(app);
