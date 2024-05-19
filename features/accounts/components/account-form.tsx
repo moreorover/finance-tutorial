@@ -14,12 +14,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-const formSchema = insertAccountsSchema.pick({
-  fullName: true,
-  instagram: true,
-  emailAddress: true,
-  phoneNumber: true,
-});
+import React from "react";
+import MultipleSelector, { Option } from "@/components/multiple-selector";
+
+const formSchema = insertAccountsSchema
+  .pick({
+    fullName: true,
+    instagram: true,
+    emailAddress: true,
+    phoneNumber: true,
+  })
+  .extend({
+    tags: z.array(z.object({ value: z.string(), label: z.string() })),
+  });
 
 type FormValues = z.input<typeof formSchema>;
 
@@ -29,6 +36,8 @@ type Props = {
   onSubmit: (values: FormValues) => void;
   onDelete?: () => void;
   disabled?: boolean;
+  // accountTags: Option[];
+  allTags: Option[];
 };
 
 export const AccountForm = ({
@@ -37,6 +46,8 @@ export const AccountForm = ({
   onSubmit,
   onDelete,
   disabled,
+  // accountTags,
+  allTags,
 }: Props) => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -109,6 +120,28 @@ export const AccountForm = ({
                 <Input
                   disabled={disabled}
                   placeholder="Phone number"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          name="tags"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone number</FormLabel>
+              <FormControl>
+                <MultipleSelector
+                  defaultOptions={allTags}
+                  placeholder="Select tags..."
+                  emptyIndicator={
+                    <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
+                      no results found.
+                    </p>
+                  }
                   {...field}
                 />
               </FormControl>

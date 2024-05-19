@@ -11,7 +11,8 @@ export const users = pgTable("users", {
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
-  accounts: many(accounts),
+  accountsCreated: many(accounts, { relationName: "createdBy" }),
+  accountsUpdated: many(accounts, { relationName: "updatedBy" }),
 }));
 
 export const accounts = pgTable("accounts", {
@@ -25,15 +26,17 @@ export const accounts = pgTable("accounts", {
 });
 
 export const insertAccountsSchema = createInsertSchema(accounts, {
-  // emailAddress: z.union([z.literal(""), z.string().email()]),
+  emailAddress: z.union([z.literal(""), z.string().email()]),
 });
 
-export const accountsRelations = relations(accounts, ({ one }) => ({
+export const accountsRelations = relations(accounts, ({ one, many }) => ({
   createdBy: one(users, {
+    relationName: "createdBy",
     fields: [accounts.createdBy],
     references: [users.id],
   }),
   updatedBy: one(users, {
+    relationName: "updatedBy",
     fields: [accounts.updatedBy],
     references: [users.id],
   }),
@@ -54,3 +57,5 @@ export const accountToTags = pgTable("accountsToTags", {
     .notNull()
     .references(() => accountTags.id),
 });
+
+export const insetAccountToTagsSchema = createInsertSchema(accountToTags);

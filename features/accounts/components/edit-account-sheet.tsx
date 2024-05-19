@@ -14,13 +14,21 @@ import { Loader2 } from "lucide-react";
 import { useEditAccount } from "../api/use-edit-account";
 import { useDeleteAccount } from "../api/use-delete-account";
 import { useConfirm } from "@/hooks/use-confirm";
+import { useUpdateAccountTags } from "../api/use-update-account-tags";
+import { useGetAccountTag } from "@/features/accountTags/api/use-get-accountTag";
+import { useGetAccountTagsForAccountId } from "../api/use-get-account-tags";
+import { useGetAccountTags } from "@/features/accountTags/api/use-get-accountTags";
 
-const formSchema = insertAccountsSchema.pick({
-  fullName: true,
-  instagram: true,
-  emailAddress: true,
-  phoneNumber: true,
-});
+const formSchema = insertAccountsSchema
+  .pick({
+    fullName: true,
+    instagram: true,
+    emailAddress: true,
+    phoneNumber: true,
+  })
+  .extend({
+    tags: z.array(z.object({ value: z.string(), label: z.string() })),
+  });
 
 type FormValues = z.input<typeof formSchema>;
 
@@ -33,14 +41,28 @@ export const EditAccountSheet = () => {
   );
 
   const accountQuery = useGetAccount(id);
+  const accountTagsQuery = useGetAccountTagsForAccountId(id);
+  const allTagsQuery = useGetAccountTags();
   const editMutation = useEditAccount(id);
+  const updateAccountTagsMutation = useUpdateAccountTags(id);
   const deleteMutation = useDeleteAccount(id);
-  const isPending = editMutation.isPending || deleteMutation.isPending;
-  const isLoading = accountQuery.isLoading;
+  const isPending =
+    editMutation.isPending ||
+    updateAccountTagsMutation.isPending ||
+    deleteMutation.isPending;
+  const isLoading = accountQuery.isLoading || accountTagsQuery.isLoading;
   const onSubmit = (values: FormValues) => {
     editMutation.mutate(values, {
       onSuccess: () => {
-        onClose();
+        const mappedTagIds = values.tags.map((tag) => tag.value);
+        updateAccountTagsMutation.mutate(
+          { tagIds: mappedTagIds },
+          {
+            onSuccess: () => {
+              onClose();
+            },
+          }
+        );
       },
     });
   };
@@ -63,12 +85,18 @@ export const EditAccountSheet = () => {
         instagram: accountQuery.data.instagram,
         emailAddress: accountQuery.data.emailAddress,
         phoneNumber: accountQuery.data.phoneNumber,
+        tags:
+          accountTagsQuery.data?.map(({ id, title }) => ({
+            label: title,
+            value: id,
+          })) || [],
       }
     : {
         fullName: "",
         instagram: "",
         emailAddress: "",
         phoneNumber: "",
+        tags: [],
       };
 
   return (
@@ -87,6 +115,18 @@ export const EditAccountSheet = () => {
           ) : (
             <AccountForm
               id={id}
+              // accountTags={
+              //   accountTagsQuery.data?.map(({ id, title }) => ({
+              //     label: title,
+              //     value: id,
+              //   })) || []
+              // }
+              allTags={
+                allTagsQuery.data?.map(({ id, title }) => ({
+                  label: title,
+                  value: id,
+                })) || []
+              }
               onSubmit={onSubmit}
               disabled={isPending}
               defaultValues={defaultValues}

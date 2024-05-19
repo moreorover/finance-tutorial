@@ -1,7 +1,13 @@
 import { Hono } from "hono";
 
 import { db } from "@/db/drizzle";
-import { accounts, insertAccountsSchema } from "@/db/schema";
+import {
+  accountTags,
+  accountToTags,
+  accounts,
+  insertAccountsSchema,
+  insetAccountToTagsSchema,
+} from "@/db/schema";
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 import { eq, inArray } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
@@ -59,6 +65,71 @@ const app = new Hono()
       if (!data) {
         return c.json({ error: "Not found" }, 404);
       }
+      return c.json({ data });
+    }
+  )
+  .get(
+    "/:id/tags",
+    clerkMiddleware(),
+    zValidator("param", z.object({ id: z.string().optional() })),
+    async (c) => {
+      const auth = getAuth(c);
+      const { id } = c.req.valid("param");
+
+      if (!id) {
+        return c.json({ error: "Missing id" }, 400);
+      }
+
+      if (!auth?.userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const data = await db
+        .select({
+          id: accountTags.id,
+          title: accountTags.title,
+        })
+        .from(accountTags)
+        .leftJoin(accountToTags, eq(accountToTags.tagId, accountTags.id))
+        .where(eq(accountToTags.accountId, id));
+
+      if (!data) {
+        return c.json({ error: "Not found" }, 404);
+      }
+      return c.json({ data });
+    }
+  )
+  .post(
+    "/:id/updateTags",
+    clerkMiddleware(),
+    zValidator("param", z.object({ id: z.string().optional() })),
+    zValidator("json", z.object({ tagIds: z.array(z.string()) })),
+    async (c) => {
+      const auth = getAuth(c);
+      const values = c.req.valid("json");
+      const { id } = c.req.valid("param");
+
+      // console.log(JSON.stringify(values, null, 2));
+
+      if (!auth?.userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      if (!id) {
+        return c.json({ error: "Missing id" }, 400);
+      }
+
+      const mappedValues = values.tagIds.map((tagId) => ({
+        accountId: id,
+        tagId: tagId,
+      }));
+
+      await db.delete(accountToTags).where(eq(accountToTags.accountId, id));
+      const data = await db
+        .insert(accountToTags)
+        .values(mappedValues)
+        .returning();
+
       return c.json({ data });
     }
   )
