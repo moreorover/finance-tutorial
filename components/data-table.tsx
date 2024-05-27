@@ -32,7 +32,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   filterLabel: string;
   filterKey: string;
-  onDelete: (rows: Row<TData>[]) => void;
+  onDelete?: (rows: Row<TData>[]) => void;
   disabled?: boolean;
 }
 
@@ -92,7 +92,7 @@ export function DataTable<TData, TValue>({
               const ok = await confirm();
 
               if (ok) {
-                onDelete(table.getFilteredSelectedRowModel().rows);
+                onDelete && onDelete(table.getFilteredSelectedRowModel().rows);
                 table.resetRowSelection();
               }
             }}

@@ -248,16 +248,21 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const [data] = await db
-        .delete(accounts)
-        .where(eq(accounts.id, id))
-        // .where(and(eq(accounts.userId, auth.userId), eq(accounts.id, id)))
-        .returning({ id: accounts.id });
+      try {
+        const [data] = await db
+          .delete(accounts)
+          .where(eq(accounts.id, id))
+          // .where(and(eq(accounts.userId, auth.userId), eq(accounts.id, id)))
+          .returning({ id: accounts.id });
 
-      if (!data) {
-        return c.json({ error: "Not found" }, 404);
+        if (!data) {
+          return c.json({ error: "Not found" }, 404);
+        }
+        return c.json({ data });
+      } catch (e) {
+        console.log(e);
       }
-      return c.json({ data });
+      return c.json({ error: "Internal error" }, 404);
     }
   );
 

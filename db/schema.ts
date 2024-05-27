@@ -1,4 +1,11 @@
-import { boolean, pgTable, text } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 import { z } from "zod";
@@ -40,6 +47,7 @@ export const accountsRelations = relations(accounts, ({ one, many }) => ({
     fields: [accounts.updatedBy],
     references: [users.id],
   }),
+  transactions: many(transactions),
 }));
 
 export const accountTags = pgTable("account_tags", {
@@ -49,13 +57,45 @@ export const accountTags = pgTable("account_tags", {
 
 export const insertAccountTagSchema = createInsertSchema(accountTags);
 
-export const accountToTags = pgTable("accountsToTags", {
+export const accountToTags = pgTable("accounts_to_tags", {
   accountId: text("account_id")
     .notNull()
-    .references(() => accounts.id),
+    .references(() => accounts.id, { onDelete: "cascade" }),
   tagId: text("tag_id")
     .notNull()
     .references(() => accountTags.id),
 });
 
 export const insetAccountToTagsSchema = createInsertSchema(accountToTags);
+
+export const transactionType = pgEnum("transactionType", [
+  "Cash",
+  "Direct Debit",
+  "Faster payment",
+  "Card payment",
+  "business-account-billing",
+  "Deposit",
+]);
+
+export const transactions = pgTable("transactions", {
+  id: text("id").primaryKey(),
+  amount: integer("amount").notNull(),
+  type: transactionType("type"),
+  notes: text("notes"),
+  currency: text("currency").notNull(),
+  date: timestamp("date", { mode: "date" }).notNull(),
+  accountId: text("account_id").references(() => accounts.id, {
+    onDelete: "set null",
+  }),
+});
+
+export const transactionsRelations = relations(transactions, ({ one }) => ({
+  account: one(accounts, {
+    fields: [transactions.accountId],
+    references: [accounts.id],
+  }),
+}));
+
+export const insertTransactionSchema = createInsertSchema(transactions, {
+  date: z.coerce.date(),
+});

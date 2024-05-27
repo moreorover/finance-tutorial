@@ -132,7 +132,7 @@ export const AccountForm = ({
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Phone number</FormLabel>
+              <FormLabel>Account tags</FormLabel>
               <FormControl>
                 <MultipleSelector
                   defaultOptions={allTags}

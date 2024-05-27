@@ -8,7 +8,7 @@ import {
 import { AccountForm } from "./account-form";
 import { insertAccountsSchema } from "@/db/schema";
 import { z } from "zod";
-import { useOpenAccounts } from "../hooks/use-open-account";
+import { useOpenAccount } from "../hooks/use-open-account";
 import { useGetAccount } from "../api/use-get-account";
 import { Loader2 } from "lucide-react";
 import { useEditAccount } from "../api/use-edit-account";
@@ -33,7 +33,7 @@ const formSchema = insertAccountsSchema
 type FormValues = z.input<typeof formSchema>;
 
 export const EditAccountSheet = () => {
-  const { isOpen, onClose, id } = useOpenAccounts();
+  const { isOpen, onClose, id } = useOpenAccount();
 
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",

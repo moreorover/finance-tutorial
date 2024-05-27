@@ -1,5 +1,5 @@
 {
-  "id": "bc8a02ff-c634-40fc-8d40-ae4315c32ea2",
+  "id": "d675a65e-f1fe-4dc7-977d-926acf60cb54",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -34,8 +34,8 @@
         }
       }
     },
-    "public.accountsToTags": {
-      "name": "accountsToTags",
+    "public.accounts_to_tags": {
+      "name": "accounts_to_tags",
       "schema": "",
       "columns": {
         "account_id": {
@@ -53,9 +53,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "accountsToTags_account_id_accounts_id_fk": {
-          "name": "accountsToTags_account_id_accounts_id_fk",
-          "tableFrom": "accountsToTags",
+        "accounts_to_tags_account_id_accounts_id_fk": {
+          "name": "accounts_to_tags_account_id_accounts_id_fk",
+          "tableFrom": "accounts_to_tags",
           "tableTo": "accounts",
           "columnsFrom": [
             "account_id"
@@ -63,12 +63,12 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "accountsToTags_tag_id_account_tags_id_fk": {
-          "name": "accountsToTags_tag_id_account_tags_id_fk",
-          "tableFrom": "accountsToTags",
+        "accounts_to_tags_tag_id_account_tags_id_fk": {
+          "name": "accounts_to_tags_tag_id_account_tags_id_fk",
+          "tableFrom": "accounts_to_tags",
           "tableTo": "account_tags",
           "columnsFrom": [
             "tag_id"
@@ -135,6 +135,73 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "public.transactions": {
+      "name": "transactions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "transactionType",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "name": "date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "transactions_account_id_accounts_id_fk": {
+          "name": "transactions_account_id_accounts_id_fk",
+          "tableFrom": "transactions",
+          "tableTo": "accounts",
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "public.users": {
       "name": "users",
       "schema": "",
@@ -179,7 +246,20 @@
       }
     }
   },
-  "enums": {},
+  "enums": {
+    "public.transactionType": {
+      "name": "transactionType",
+      "schema": "public",
+      "values": [
+        "Cash",
+        "Direct Debit",
+        "Faster payment",
+        "Card payment",
+        "business-account-billing",
+        "Deposit"
+      ]
+    }
+  },
   "schemas": {},
   "_meta": {
     "columns": {},

@@ -10,6 +10,7 @@ import { AccountForm } from "./account-form";
 import { insertAccountsSchema } from "@/db/schema";
 import { z } from "zod";
 import { useCreateAccount } from "@/features/accounts/api/use-create-account";
+import { useGetAccountTags } from "@/features/accountTags/api/use-get-accountTags";
 
 const formSchema = insertAccountsSchema.pick({
   fullName: true,
@@ -23,6 +24,7 @@ type FormValues = z.input<typeof formSchema>;
 export const NewAccountSheet = () => {
   const { isOpen, onClose } = useNewAccount.useNewAccounts();
   const mutation = useCreateAccount();
+  const allTagsQuery = useGetAccountTags();
   const onSubmit = (values: FormValues) => {
     mutation.mutate(values, {
       onSuccess: () => {
@@ -45,7 +47,14 @@ export const NewAccountSheet = () => {
             instagram: "",
             emailAddress: "",
             phoneNumber: "",
+            tags: [],
           }}
+          allTags={
+            allTagsQuery.data?.map(({ id, title }) => ({
+              label: title,
+              value: id,
+            })) || []
+          }
         />
       </SheetContent>
     </Sheet>
