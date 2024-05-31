@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
 import { AccountColumn } from "./account-column";
+import { TransactionOpenButton } from "./transaction-open-button";
 
 export type ResponseType = InferResponseType<
   typeof client.api.transactions.$get,
@@ -108,9 +109,31 @@ export const columns: ColumnDef<ResponseType>[] = [
           />
         );
       }
-      return <span>Unassigned</span>;
+
+      return (
+        <>
+          <TransactionOpenButton id={row.original.id} />
+        </>
+      );
     },
   },
+  // {
+  //   accessorKey: "notes",
+  //   header: ({ column }) => {
+  //     return (
+  //       <Button
+  //         variant="ghost"
+  //         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+  //       >
+  //         Notes
+  //         <ArrowUpDown className="ml-2 h-4 w-4" />
+  //       </Button>
+  //     );
+  //   },
+  //   cell: ({ row }) => {
+  //     return <span>{row.getValue("notes")}</span>;
+  //   },
+  // },
   {
     id: "actions",
     cell: ({ row }) => <Actions id={row.original.id} />,

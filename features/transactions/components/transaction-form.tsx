@@ -74,6 +74,8 @@ export const TransactionForm = ({
     onDelete?.();
   };
 
+  const isMonzo = id?.startsWith("mm_");
+
   const currencyOptions: { value: string; label: string }[] = [
     { value: "GBP", label: "GBP" },
     { value: "EUR", label: "EUR" },
@@ -98,7 +100,7 @@ export const TransactionForm = ({
                 <DatePicker
                   value={field.value}
                   onChange={field.onChange}
-                  disabled={disabled}
+                  disabled={disabled || isMonzo}
                 />
               </FormControl>
             </FormItem>
@@ -134,7 +136,7 @@ export const TransactionForm = ({
                   options={typeOptions}
                   value={field.value}
                   onChange={field.onChange}
-                  disabled={disabled}
+                  disabled={disabled || isMonzo}
                 />
               </FormControl>
             </FormItem>
@@ -149,7 +151,7 @@ export const TransactionForm = ({
               <FormControl>
                 <AmountInput
                   {...field}
-                  disabled={disabled}
+                  disabled={disabled || isMonzo}
                   placeholder="0.00"
                 />
               </FormControl>
@@ -169,7 +171,7 @@ export const TransactionForm = ({
                   defaultOption={defaultCurrencyOption}
                   value={field.value}
                   onChange={field.onChange}
-                  disabled={disabled}
+                  disabled={disabled || isMonzo}
                 />
               </FormControl>
             </FormItem>
@@ -198,7 +200,7 @@ export const TransactionForm = ({
         {!!id && (
           <Button
             type="button"
-            disabled={disabled}
+            disabled={disabled || isMonzo}
             onClick={handleDelete}
             className="w-full"
             variant="outline"

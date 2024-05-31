@@ -3,20 +3,17 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNewTransaction } from "@/features/transactions/hooks/use-new-transaction";
-import { Loader2, Plus } from "lucide-react";
+import { Landmark, Loader2, Plus, Upload, User } from "lucide-react";
 import { columns } from "./columns";
 import { DataTable } from "@/components/data-table";
 import { useGetTransactions } from "@/features/transactions/api/use-get-transactions";
 import { useState } from "react";
 import { UploadButton } from "./upload-button";
 import { ImportCard } from "./import-card";
-import { transactions as transactionSchema } from "@/db/schema";
+import { insertTransactionSchema } from "@/db/schema";
 import { useBulkCreateTransactions } from "@/features/transactions/api/use-bulk-create-transactions";
-
-enum VARIANTS {
-  LIST = "LIST",
-  IMPORT = "IMPORT",
-}
+import { MonzoUploadButton } from "./monzo-upload-button";
+import { z } from "zod";
 
 const INITIAL_IMPORT_RESULTS = {
   data: [],
@@ -25,8 +22,6 @@ const INITIAL_IMPORT_RESULTS = {
 };
 
 const TransactionsPage = () => {
-  const [variant, setVariant] = useState<VARIANTS>(VARIANTS.LIST);
-  const [importResults, setImportResults] = useState(INITIAL_IMPORT_RESULTS);
   const newTransaction = useNewTransaction();
   const transactionsQuery = useGetTransactions();
   const createTransactions = useBulkCreateTransactions();
@@ -35,35 +30,8 @@ const TransactionsPage = () => {
 
   const isDisabled = transactionsQuery.isLoading;
 
-  const onUpload = (results: typeof INITIAL_IMPORT_RESULTS) => {
-    setImportResults(results);
-    setVariant(VARIANTS.IMPORT);
-  };
-
-  const onCancelImport = () => {
-    setImportResults(INITIAL_IMPORT_RESULTS);
-    setVariant(VARIANTS.LIST);
-  };
-
-  const onSubmitImport = async (
-    values: (typeof transactionSchema.$inferInsert)[]
-  ) => {
-    // const accountId = await confirm();
-
-    // if (!accountId) {
-    //   return toast.error("Please select an account to continue.");
-    // }
-
-    const data = values.map((value) => ({
-      ...value,
-      // accountId: accountId as string,
-    }));
-
-    createTransactions.mutate(data, {
-      onSuccess: () => {
-        onCancelImport();
-      },
-    });
+  const onUpload = (results: z.infer<typeof insertTransactionSchema>[]) => {
+    createTransactions.mutate(results);
   };
 
   if (transactionsQuery.isLoading) {
@@ -81,18 +49,6 @@ const TransactionsPage = () => {
     );
   }
 
-  if (variant === VARIANTS.IMPORT) {
-    return (
-      <>
-        <ImportCard
-          data={importResults.data}
-          onCancel={onCancelImport}
-          onSubmit={onSubmitImport}
-        />
-      </>
-    );
-  }
-
   return (
     <div className="max-w-screen-2xl mx-auto w-full pb-10 -mt-24">
       <Card className="border-none drop-shadow-sm">
@@ -105,7 +61,7 @@ const TransactionsPage = () => {
               <Plus className="size-4 mr-2" />
               Add new
             </Button>
-            <UploadButton onUpload={onUpload} />
+            <MonzoUploadButton onUpload={onUpload} />
           </div>
         </CardHeader>
         <CardContent>
