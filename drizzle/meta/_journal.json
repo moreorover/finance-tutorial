@@ -8,6 +8,20 @@
       "when": 1716842725162,
       "tag": "0000_familiar_gambit",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1717190581315,
+      "tag": "0001_faithful_hellcat",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1717197930942,
+      "tag": "0002_steep_maestro",
+      "breakpoints": true
     }
   ]
 }

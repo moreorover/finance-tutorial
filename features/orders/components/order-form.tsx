@@ -2,8 +2,8 @@ import { z } from "zod";
 import { Trash } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { insertTransactionSchema, transactionType } from "@/db/schema";
 import {
   Form,
   FormControl,
@@ -14,22 +14,24 @@ import {
 } from "@/components/ui/form";
 
 import React from "react";
-import { convertAmountToMiliunits } from "@/lib/utils";
-import { DatePicker } from "@/components/date-picker";
-import { SingleSelect } from "@/components/single-select";
+import { Option } from "@/components/multiple-selector";
 import { AmountInput } from "@/components/amount-input";
-import { Textarea } from "@/components/ui/textarea";
+import CurrencyInput from "react-currency-input-field";
+import { SingleSelect } from "@/components/single-select";
+import { DatePicker } from "@/components/date-picker";
+import { convertAmountToMiliunits } from "@/lib/utils";
+import { insertOrderSchema } from "@/db/schema";
 
 const formSchema = z.object({
-  date: z.coerce.date(),
-  accountId: z.string().nullable(),
-  amount: z.string(),
-  notes: z.string().nullable().optional(),
-  type: z.enum(transactionType.enumValues).nullable(),
+  title: z.string(),
+  total: z.string(),
   currency: z.string(),
+  placedAt: z.coerce.date(),
+  receivedAt: z.coerce.date().nullable(),
+  accountId: z.string().nullable(),
 });
 
-const apiSchema = insertTransactionSchema.omit({
+const apiSchema = insertOrderSchema.omit({
   id: true,
 });
 
@@ -42,18 +44,16 @@ type Props = {
   onSubmit: (values: ApiFormValues) => void;
   onDelete?: () => void;
   disabled?: boolean;
-  accountOptions: { label: string; value: string }[];
-  typeOptions: { label: string; value: string }[];
+  accountOptions: Option[];
 };
 
-export const TransactionForm = ({
+export const OrderForm = ({
   id,
   defaultValues,
   onSubmit,
   onDelete,
   disabled,
   accountOptions,
-  typeOptions,
 }: Props) => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -61,20 +61,22 @@ export const TransactionForm = ({
   });
 
   const handleSubmit = (values: FormValues) => {
-    const amount = parseFloat(values.amount);
-    const amountInMiliunits = convertAmountToMiliunits(amount);
+    const total = parseFloat(values.total);
+    console.log({ total });
+    const amountInMiliunits =
+      total > 0
+        ? convertAmountToMiliunits(total) * -1
+        : convertAmountToMiliunits(total);
 
     onSubmit({
       ...values,
-      amount: amountInMiliunits,
+      total: amountInMiliunits,
     });
   };
 
   const handleDelete = () => {
     onDelete?.();
   };
-
-  const isMonzo = id?.startsWith("mm_");
 
   const currencyOptions: { value: string; label: string }[] = [
     { value: "GBP", label: "GBP" },
@@ -83,7 +85,7 @@ export const TransactionForm = ({
     { value: "RUB", label: "RUB" },
   ];
 
-  const defaultCurrencyOption = currencyOptions[0];
+  const defaultCurrencyOption = { value: "GBP", label: "GBP" };
 
   return (
     <Form {...form}>
@@ -92,18 +94,15 @@ export const TransactionForm = ({
         className="space-y-4 pt-4"
       >
         <FormField
-          name="date"
+          name="title"
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Date</FormLabel>
+              <FormLabel>Title</FormLabel>
               <FormControl>
-                <DatePicker
-                  value={field.value}
-                  onChange={field.onChange}
-                  disabled={disabled || isMonzo}
-                />
+                <Input disabled={disabled} placeholder="Title" {...field} />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -126,25 +125,7 @@ export const TransactionForm = ({
           )}
         />
         <FormField
-          name="type"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Type</FormLabel>
-              <FormControl>
-                <SingleSelect
-                  placeholder="Select transaction type"
-                  options={typeOptions}
-                  value={field.value}
-                  onChange={field.onChange}
-                  disabled={disabled || isMonzo}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="amount"
+          name="total"
           control={form.control}
           render={({ field }) => (
             <FormItem>
@@ -152,7 +133,7 @@ export const TransactionForm = ({
               <FormControl>
                 <AmountInput
                   {...field}
-                  disabled={disabled || isMonzo}
+                  disabled={disabled}
                   placeholder="0.00"
                 />
               </FormControl>
@@ -172,24 +153,23 @@ export const TransactionForm = ({
                   defaultOption={defaultCurrencyOption}
                   value={field.value}
                   onChange={field.onChange}
-                  disabled={disabled || isMonzo}
+                  disabled={disabled}
                 />
               </FormControl>
             </FormItem>
           )}
         />
         <FormField
-          name="notes"
+          name="placedAt"
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Notes</FormLabel>
+              <FormLabel>Placed At</FormLabel>
               <FormControl>
-                <Textarea
-                  {...field}
-                  value={field.value ?? ""}
+                <DatePicker
+                  value={field.value}
+                  onChange={field.onChange}
                   disabled={disabled}
-                  placeholder="Optional notes"
                 />
               </FormControl>
             </FormItem>
@@ -201,13 +181,13 @@ export const TransactionForm = ({
         {!!id && (
           <Button
             type="button"
-            disabled={disabled || isMonzo}
+            disabled={disabled}
             onClick={handleDelete}
             className="w-full"
             variant="outline"
           >
             <Trash className="size-4 mr-2" />
-            Delete transaction
+            Delete order
           </Button>
         )}
       </form>

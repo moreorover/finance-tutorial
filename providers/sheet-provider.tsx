@@ -8,6 +8,8 @@ import { EditAccountTagSheet } from "@/features/accountTags/components/edit-acco
 import { NewAccountTagSheet } from "@/features/accountTags/components/new-accountTag-sheet";
 import { NewTransactionSheet } from "@/features/transactions/components/new-transaction-sheet";
 import { EditTransactionSheet } from "@/features/transactions/components/edit-transaction-sheet";
+import { EditOrderSheet } from "@/features/orders/components/edit-order-sheet";
+import { NewOrderSheet } from "@/features/orders/components/new-order-sheet";
 
 export const SheetProvider = () => {
   const isMounted = useMountedState();
@@ -24,6 +26,9 @@ export const SheetProvider = () => {
 
       <EditTransactionSheet />
       <NewTransactionSheet />
+
+      <EditOrderSheet />
+      <NewOrderSheet />
     </>
   );
 };

@@ -13,6 +13,7 @@ const routes = [
   { href: "/accounts", label: "Accounts" },
   { href: "/accountTags", label: "TAG's" },
   { href: "/transactions", label: "Transactions" },
+  { href: "/orders", label: "Orders" },
 ];
 
 export const Navigation = () => {

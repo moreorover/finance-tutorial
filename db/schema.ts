@@ -6,7 +6,7 @@ import {
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 import { z } from "zod";
 
@@ -48,6 +48,7 @@ export const accountsRelations = relations(accounts, ({ one, many }) => ({
     references: [users.id],
   }),
   transactions: many(transactions),
+  orders: many(orders),
 }));
 
 export const accountTags = pgTable("account_tags", {
@@ -99,3 +100,25 @@ export const transactionsRelations = relations(transactions, ({ one }) => ({
 export const insertTransactionSchema = createInsertSchema(transactions, {
   date: z.coerce.date(),
 });
+
+export const orders = pgTable("orders", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  total: integer("total").notNull(),
+  currency: text("currency").notNull(),
+  placedAt: timestamp("placed_at", { mode: "date" }).notNull(),
+  accountId: text("account_id").references(() => accounts.id, {
+    onDelete: "set null",
+  }),
+});
+
+export const insertOrderSchema = createInsertSchema(orders, {
+  placedAt: z.coerce.date(),
+});
+
+export const ordersRelations = relations(orders, ({ one }) => ({
+  account: one(accounts, {
+    fields: [orders.accountId],
+    references: [accounts.id],
+  }),
+}));
