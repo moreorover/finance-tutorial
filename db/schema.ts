@@ -6,7 +6,7 @@ import {
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { createInsertSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 import { z } from "zod";
 
@@ -88,6 +88,9 @@ export const transactions = pgTable("transactions", {
   accountId: text("account_id").references(() => accounts.id, {
     onDelete: "set null",
   }),
+  orderId: text("order_id").references(() => orders.id, {
+    onDelete: "set null",
+  }),
 });
 
 export const transactionsRelations = relations(transactions, ({ one }) => ({
@@ -116,9 +119,10 @@ export const insertOrderSchema = createInsertSchema(orders, {
   placedAt: z.coerce.date(),
 });
 
-export const ordersRelations = relations(orders, ({ one }) => ({
+export const ordersRelations = relations(orders, ({ one, many }) => ({
   account: one(accounts, {
     fields: [orders.accountId],
     references: [accounts.id],
   }),
+  transactions: many(transactions),
 }));

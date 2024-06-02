@@ -46,7 +46,7 @@ export const NewOrderSheet = () => {
         </SheetHeader>
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center">
-            <Loader2 className="size-4 text-muted-foreground animate-spin" />
+            <Loader2 className="size-4 animate-spin text-muted-foreground" />
           </div>
         ) : (
           <OrderForm

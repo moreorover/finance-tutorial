@@ -7,16 +7,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { useGetOrder } from "@/features/orders/api/use-get-order";
 import { OrderOpenButton } from "./order-open-button";
 import { formatCurrency, formatDateStampString } from "@/lib/utils";
 import { AccountColumn } from "./account-column";
+import { Button } from "@/components/ui/button";
+import { DataTable } from "@/components/data-table";
+import { useNewTransaction } from "@/features/transactions/hooks/use-new-transaction";
 
 const OrderPage = ({ params }: { params: { id: string } }) => {
   const orderQuery = useGetOrder(params.id);
+  const newTransaction = useNewTransaction();
 
   const isDisabled = orderQuery.isLoading;
+
+  const openTransaction = () => {
+    newTransaction.onOpen(params.id);
+  };
 
   if (isDisabled) {
     return (
@@ -79,6 +87,30 @@ const OrderPage = ({ params }: { params: { id: string } }) => {
                   />
                 </CardTitle>
               </CardHeader>
+            </Card>
+          </div>
+          <div className="mx-auto -mt-24 w-full max-w-screen-2xl pb-10">
+            <Card className="border-none drop-shadow-sm">
+              <CardHeader className="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
+                <CardTitle className="line-clamp-1 text-xl">
+                  Transactions
+                </CardTitle>
+                <div className="flex items-center gap-x-2">
+                  <Button onClick={openTransaction} size="sm">
+                    <Plus className="mr-2 size-4" />
+                    Add new
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {/* <DataTable
+                  filterLabel="Type"
+                  filterKey="type"
+                  columns={columns}
+                  data={transactions}
+                  disabled={isDisabled}
+                /> */}
+              </CardContent>
             </Card>
           </div>
         </CardContent>

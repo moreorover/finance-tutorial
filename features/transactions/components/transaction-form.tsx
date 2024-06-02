@@ -169,7 +169,7 @@ export const TransactionForm = ({
                 <SingleSelect
                   placeholder="Select transaction currency"
                   options={currencyOptions}
-                  defaultOption={defaultCurrencyOption}
+                  // defaultOption={defaultCurrencyOption}
                   value={field.value}
                   onChange={field.onChange}
                   disabled={disabled || isMonzo}
@@ -206,7 +206,7 @@ export const TransactionForm = ({
             className="w-full"
             variant="outline"
           >
-            <Trash className="size-4 mr-2" />
+            <Trash className="mr-2 size-4" />
             Delete transaction
           </Button>
         )}

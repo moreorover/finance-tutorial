@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 
 import { db } from "@/db/drizzle";
-import { accounts, orders, insertOrderSchema } from "@/db/schema";
+import { accounts, orders, transactions, insertOrderSchema } from "@/db/schema";
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 import { eq, desc } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
@@ -57,9 +57,17 @@ const app = new Hono()
           placedAt: orders.placedAt,
           account: accounts.fullName,
           accountId: orders.accountId,
+          transactions: {
+            id: transactions.id,
+            amount: transactions.amount,
+            type: transactions.type,
+            currency: transactions.currency,
+            date: transactions.date,
+          },
         })
         .from(orders)
         .leftJoin(accounts, eq(orders.accountId, accounts.id))
+        .leftJoin(transactions, eq(transactions.orderId, id))
         .orderBy(desc(orders.placedAt))
         .where(eq(orders.id, id));
 
@@ -67,7 +75,7 @@ const app = new Hono()
         return c.json({ error: "Not found" }, 404);
       }
       return c.json({ data });
-    }
+    },
   )
   .post(
     "/",
@@ -90,7 +98,7 @@ const app = new Hono()
         .returning();
 
       return c.json({ data });
-    }
+    },
   )
   .patch(
     "/:id",
@@ -99,7 +107,7 @@ const app = new Hono()
       "param",
       z.object({
         id: z.string().optional(),
-      })
+      }),
     ),
     zValidator("json", insertOrderSchema.omit({ id: true })),
     async (c) => {
@@ -126,7 +134,7 @@ const app = new Hono()
       }
 
       return c.json({ data });
-    }
+    },
   )
   .delete(
     "/:id",
@@ -159,7 +167,7 @@ const app = new Hono()
         console.log(e);
       }
       return c.json({ error: "Internal error" }, 404);
-    }
+    },
   );
 
 export default app;
