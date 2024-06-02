@@ -1,4 +1,5 @@
 import { type ClassValue, clsx } from "clsx";
+import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -20,4 +21,11 @@ export function formatCurrency(value: number, currency: string | null) {
     minimumFractionDigits: 2,
     currencyDisplay: "narrowSymbol",
   }).format(value);
+}
+
+export function formatDateStampString(
+  timestamp: string,
+  outputFormat: string
+): string {
+  return format(new Date(timestamp), outputFormat);
 }

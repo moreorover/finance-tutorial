@@ -10,7 +10,7 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
 import { AccountColumn } from "./account-column";
-import { OrderOpenButton } from "./order-open-button";
+import { TitleColumn } from "./title-column";
 
 export type ResponseType = InferResponseType<
   typeof client.api.orders.$get,
@@ -29,6 +29,11 @@ export const columns: ColumnDef<ResponseType>[] = [
           Title
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
+      );
+    },
+    cell: ({ row }) => {
+      return (
+        <TitleColumn orderId={row.original.id} title={row.original.title} />
       );
     },
   },
