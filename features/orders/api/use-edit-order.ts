@@ -26,6 +26,14 @@ export const useEditOrder = (id?: string) => {
       toast.success("Order updated");
       queryClient.invalidateQueries({ queryKey: ["order", { id }] });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({
+        queryKey: ["transactions"],
+        exact: false,
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["transaction"],
+        exact: false,
+      });
     },
     onError: () => {
       toast.error("Failed to update order");

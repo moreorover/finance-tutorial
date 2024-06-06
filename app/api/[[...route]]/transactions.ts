@@ -18,12 +18,13 @@ const app = new Hono()
         from: z.string().optional(),
         to: z.string().optional(),
         accountId: z.string().optional(),
-      })
+        orderId: z.string().optional(),
+      }),
     ),
     clerkMiddleware(),
     async (c) => {
       const auth = getAuth(c);
-      const { from, to, accountId } = c.req.valid("query");
+      const { from, to, accountId, orderId } = c.req.valid("query");
 
       if (!auth?.userId) {
         return c.json({ error: "Unauthorized" }, 401);
@@ -54,14 +55,15 @@ const app = new Hono()
         .where(
           and(
             accountId ? eq(transactions.accountId, accountId) : undefined,
+            orderId ? eq(transactions.orderId, orderId) : undefined,
             gte(transactions.date, startDate),
-            lte(transactions.date, endDate)
-          )
+            lte(transactions.date, endDate),
+          ),
         )
         .orderBy(desc(transactions.date));
 
       return c.json({ data });
-    }
+    },
   )
   .get(
     "/:id",
@@ -98,7 +100,7 @@ const app = new Hono()
         return c.json({ error: "Not found" }, 404);
       }
       return c.json({ data });
-    }
+    },
   )
   .post(
     "/",
@@ -111,19 +113,19 @@ const app = new Hono()
       if (!auth?.userId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
-      try {
-        const [data] = await db
-          .insert(transactions)
-          .values({
-            ...values,
-            id: values.id && values.id.length > 0 ? values.id : createId(),
-          })
-          .returning();
-        return c.json({ data });
-      } catch (e) {
-        console.log(e);
-      }
-    }
+      // try {
+      const [data] = await db
+        .insert(transactions)
+        .values({
+          ...values,
+          id: values.id && values.id.length > 0 ? values.id : createId(),
+        })
+        .returning();
+      return c.json({ data });
+      // } catch (e) {
+      // console.log(e);
+      // }
+    },
   )
   .post(
     "/bulk-create",
@@ -142,12 +144,12 @@ const app = new Hono()
         .values(
           values.map((value) => ({
             ...value,
-          }))
+          })),
         )
         .returning();
 
       return c.json({ data });
-    }
+    },
   )
   .patch(
     "/:id",
@@ -156,7 +158,7 @@ const app = new Hono()
       "param",
       z.object({
         id: z.string().optional(),
-      })
+      }),
     ),
     zValidator("json", insertTransactionSchema.omit({ id: true })),
     async (c) => {
@@ -183,7 +185,7 @@ const app = new Hono()
       }
 
       return c.json({ data });
-    }
+    },
   )
   .delete(
     "/:id",
@@ -210,7 +212,7 @@ const app = new Hono()
         return c.json({ error: "Not found" }, 404);
       }
       return c.json({ data });
-    }
+    },
   );
 
 export default app;

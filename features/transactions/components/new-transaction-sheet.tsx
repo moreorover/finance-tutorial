@@ -18,7 +18,8 @@ const formSchema = insertTransactionSchema.omit({ id: true });
 type FormValues = z.input<typeof formSchema>;
 
 export const NewTransactionSheet = () => {
-  const { state, onClose } = useNewTransactions.useNewTransaction();
+  const { isOpen, orderId, onClose, accountId } =
+    useNewTransactions.useNewTransaction();
 
   const accountsQuery = useGetAccounts();
   const isLoading = accountsQuery.isLoading;
@@ -40,7 +41,7 @@ export const NewTransactionSheet = () => {
   const onSubmit = (values: FormValues) => {
     // console.table(values);
     mutation.mutate(
-      { ...values, id: "", orderId: state.orderId },
+      { ...values, id: "", orderId },
       {
         onSuccess: () => {
           onClose();
@@ -49,7 +50,7 @@ export const NewTransactionSheet = () => {
     );
   };
   return (
-    <Sheet open={state.isOpen} onOpenChange={onClose}>
+    <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="space-y-4">
         <SheetHeader>
           <SheetTitle>New Transaction</SheetTitle>
@@ -64,7 +65,7 @@ export const NewTransactionSheet = () => {
             onSubmit={onSubmit}
             disabled={isPending}
             defaultValues={{
-              accountId: "",
+              accountId: accountId ? accountId : "",
               type: null,
               amount: "",
               date: new Date(),

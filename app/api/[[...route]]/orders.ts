@@ -7,6 +7,7 @@ import { eq, desc } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
 import { createId } from "@paralleldrive/cuid2";
 import { z } from "zod";
+import { useQueryClient } from "@tanstack/react-query";
 
 const app = new Hono()
   .get("/", clerkMiddleware(), async (c) => {
@@ -49,6 +50,8 @@ const app = new Hono()
       }
 
       const [data] = await db
+        // this returns a first object from the array
+        // there will be as many objects in the array as many transactions for the order
         .select({
           id: orders.id,
           title: orders.title,
@@ -129,11 +132,17 @@ const app = new Hono()
         .where(eq(orders.id, id))
         .returning();
 
+      const orderTransactions = await db
+        .update(transactions)
+        .set({ accountId: values.accountId })
+        .where(eq(transactions.orderId, id))
+        .returning({ id: transactions.id });
+
       if (!data) {
         return c.json({ error: "Not found" }, 404);
       }
 
-      return c.json({ data });
+      return c.json({ ...data, transactionIds: orderTransactions });
     },
   )
   .delete(

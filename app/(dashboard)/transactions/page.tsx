@@ -21,10 +21,6 @@ const TransactionsPage = () => {
 
   const isDisabled = transactionsQuery.isLoading;
 
-  const onTransactionSheetOpen = () => {
-    onOpen();
-  };
-
   const onUpload = (results: z.infer<typeof insertTransactionSchema>[]) => {
     createTransactions.mutate(results);
   };
@@ -52,7 +48,7 @@ const TransactionsPage = () => {
             Transactions Page
           </CardTitle>
           <div className="flex items-center gap-x-2">
-            <Button onClick={onTransactionSheetOpen} size="sm">
+            <Button onClick={onOpen} size="sm">
               <Plus className="mr-2 size-4" />
               Add new
             </Button>

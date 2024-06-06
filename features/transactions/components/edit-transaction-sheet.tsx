@@ -27,7 +27,7 @@ export const EditTransactionSheet = () => {
 
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
-    "You are about to delete this transaction"
+    "You are about to delete this transaction",
   );
 
   const transactionQuery = useGetTransaction(id);
@@ -35,7 +35,11 @@ export const EditTransactionSheet = () => {
   const editMutation = useEditTransaction(id);
   const deleteMutation = useDeleteTransaction(id);
   const isPending = editMutation.isPending || deleteMutation.isPending;
-  const isLoading = transactionQuery.isLoading || accountsQuery.isLoading;
+  const isLoading =
+    transactionQuery.isLoading ||
+    accountsQuery.isLoading ||
+    transactionQuery.isRefetching ||
+    accountsQuery.isRefetching;
 
   const accountOptions = (accountsQuery.data ?? []).map((account) => ({
     label: account.fullName,
@@ -98,7 +102,7 @@ export const EditTransactionSheet = () => {
           </SheetHeader>
           {isLoading ? (
             <div className="absolute inset-0 flex items-center justify-center">
-              <Loader2 className="size-4 text-muted-foreground animate-spin" />
+              <Loader2 className="size-4 animate-spin text-muted-foreground" />
             </div>
           ) : (
             <TransactionForm

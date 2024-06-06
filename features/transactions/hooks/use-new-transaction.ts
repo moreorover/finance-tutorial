@@ -3,16 +3,26 @@ import { create } from "zustand";
 type State = {
   isOpen: boolean;
   orderId?: string;
+  accountId?: string;
 };
 
-type NewTransactionState = {
-  state: State;
-  onOpen: (orderId?: string) => void;
+type Actions = {
+  onOpen: () => void;
   onClose: () => void;
+  setOrderId: (orderId: string) => void;
+  setAccountId: (accountId: string) => void;
 };
 
-export const useNewTransaction = create<NewTransactionState>((set) => ({
-  state: { isOpen: false },
-  onOpen: (orderId?: string) => set({ state: { isOpen: true, orderId } }),
-  onClose: () => set({ state: { isOpen: false } }),
+const initialState: State = {
+  isOpen: false,
+  orderId: undefined,
+  accountId: undefined,
+};
+
+export const useNewTransaction = create<State & Actions>((set) => ({
+  ...initialState,
+  onOpen: () => set({ isOpen: true }),
+  onClose: () => set(initialState),
+  setOrderId: (orderId: string) => set({ orderId }),
+  setAccountId: (accountId: string) => set({ accountId }),
 }));

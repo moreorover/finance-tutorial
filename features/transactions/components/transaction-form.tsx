@@ -119,7 +119,7 @@ export const TransactionForm = ({
                   options={accountOptions}
                   value={field.value}
                   onChange={field.onChange}
-                  disabled={disabled}
+                  disabled={defaultValues?.accountId ? true : disabled}
                 />
               </FormControl>
             </FormItem>

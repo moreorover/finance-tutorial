@@ -15,15 +15,21 @@ import { AccountColumn } from "./account-column";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/data-table";
 import { useNewTransaction } from "@/features/transactions/hooks/use-new-transaction";
+import { columns } from "./transaction-columns";
+import { useGetTransactions } from "@/features/transactions/api/use-get-transactions";
 
 const OrderPage = ({ params }: { params: { id: string } }) => {
   const orderQuery = useGetOrder(params.id);
+  const orderTransactionsQuery = useGetTransactions(params.id);
   const newTransaction = useNewTransaction();
 
-  const isDisabled = orderQuery.isLoading;
+  const isDisabled = orderQuery.isLoading || orderTransactionsQuery.isLoading;
 
   const openTransaction = () => {
-    newTransaction.onOpen(params.id);
+    newTransaction.setOrderId(params.id);
+    orderQuery.data?.accountId &&
+      newTransaction.setAccountId(orderQuery.data?.accountId);
+    newTransaction.onOpen();
   };
 
   if (isDisabled) {
@@ -89,32 +95,41 @@ const OrderPage = ({ params }: { params: { id: string } }) => {
               </CardHeader>
             </Card>
           </div>
-          <div className="mx-auto -mt-24 w-full max-w-screen-2xl pb-10">
+          <div className="mx-auto mt-4 w-full max-w-screen-2xl pb-10">
             <Card className="border-none drop-shadow-sm">
               <CardHeader className="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
                 <CardTitle className="line-clamp-1 text-xl">
                   Transactions
                 </CardTitle>
                 <div className="flex items-center gap-x-2">
-                  <Button onClick={openTransaction} size="sm">
+                  <Button
+                    onClick={openTransaction}
+                    size="sm"
+                    disabled={!orderQuery?.data?.accountId}
+                  >
                     <Plus className="mr-2 size-4" />
                     Add new
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                {/* <DataTable
+                <DataTable
                   filterLabel="Type"
                   filterKey="type"
                   columns={columns}
-                  data={transactions}
+                  data={
+                    orderTransactionsQuery.data
+                      ? orderTransactionsQuery.data
+                      : []
+                  }
                   disabled={isDisabled}
-                /> */}
+                />
               </CardContent>
             </Card>
           </div>
         </CardContent>
       </Card>
+      {JSON.stringify(orderTransactionsQuery.data, null, 2)}
     </div>
   );
 };
