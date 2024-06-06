@@ -49,6 +49,7 @@ export const accountsRelations = relations(accounts, ({ one, many }) => ({
   }),
   transactions: many(transactions),
   orders: many(orders),
+  hair: many(hair),
 }));
 
 export const accountTags = pgTable("account_tags", {
@@ -125,4 +126,22 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
     references: [accounts.id],
   }),
   transactions: many(transactions),
+  hair: many(hair),
 }));
+
+export const hair = pgTable("hair", {
+  id: text("id").primaryKey(),
+  upc: text("upc").unique().notNull(),
+  colour: text("colour").notNull(),
+  length: integer("length").notNull(),
+  weight: integer("weight").notNull(),
+  weightInStock: integer("weight_in_stock").notNull(),
+  sellerId: text("seller_id").references(() => accounts.id, {
+    onDelete: "set null",
+  }),
+  orderId: text("order_id").references(() => orders.id, {
+    onDelete: "set null",
+  }),
+});
+
+export const insertHairSchema = createInsertSchema(hair);

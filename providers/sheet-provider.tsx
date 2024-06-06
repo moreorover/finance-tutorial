@@ -10,6 +10,8 @@ import { NewTransactionSheet } from "@/features/transactions/components/new-tran
 import { EditTransactionSheet } from "@/features/transactions/components/edit-transaction-sheet";
 import { EditOrderSheet } from "@/features/orders/components/edit-order-sheet";
 import { NewOrderSheet } from "@/features/orders/components/new-order-sheet";
+import { EditHairSheet } from "@/features/hair/components/edit-hair-sheet";
+import { NewHairSheet } from "@/features/hair/components/new-hair-sheet";
 
 export const SheetProvider = () => {
   const isMounted = useMountedState();
@@ -29,6 +31,9 @@ export const SheetProvider = () => {
 
       <EditOrderSheet />
       <NewOrderSheet />
+
+      <EditHairSheet />
+      <NewHairSheet />
     </>
   );
 };

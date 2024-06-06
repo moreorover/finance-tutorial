@@ -5,7 +5,7 @@ import { client } from "@/lib/hono";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, TriangleAlert } from "lucide-react";
-import { Actions } from "./actions";
+import { TransactionActions } from "./transactionActions";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
@@ -15,7 +15,7 @@ export type ResponseType = InferResponseType<
   200
 >["data"]["transactions"];
 
-export const columns: ColumnDef<ResponseType>[] = [
+export const transactionColumns: ColumnDef<ResponseType>[] = [
   {
     accessorKey: "date",
     header: ({ column }) => {
@@ -104,6 +104,6 @@ export const columns: ColumnDef<ResponseType>[] = [
   // },
   {
     id: "actions",
-    cell: ({ row }) => <Actions id={row.original.id} />,
+    cell: ({ row }) => <TransactionActions id={row.original.id} />,
   },
 ];

@@ -1,37 +1,58 @@
 import { Hono } from "hono";
 
 import { db } from "@/db/drizzle";
-import { accounts, orders, transactions, insertOrderSchema } from "@/db/schema";
+import { accounts, hair, orders, insertHairSchema } from "@/db/schema";
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
-import { eq, desc } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
 import { createId } from "@paralleldrive/cuid2";
 import { z } from "zod";
 
 const app = new Hono()
-  .get("/", clerkMiddleware(), async (c) => {
-    const auth = getAuth(c);
+  .get(
+    "/",
+    zValidator(
+      "query",
+      z.object({
+        orderId: z.string().optional(),
+        sellerId: z.string().optional(),
+      }),
+    ),
+    clerkMiddleware(),
+    async (c) => {
+      const auth = getAuth(c);
 
-    if (!auth?.userId) {
-      return c.json({ error: "Unauthorized" }, 401);
-    }
+      if (!auth?.userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
 
-    const data = await db
-      .select({
-        id: orders.id,
-        title: orders.title,
-        total: orders.total,
-        currency: orders.currency,
-        placedAt: orders.placedAt,
-        account: accounts.fullName,
-        accountId: orders.accountId,
-      })
-      .from(orders)
-      .leftJoin(accounts, eq(orders.accountId, accounts.id))
-      .orderBy(desc(orders.placedAt));
+      const { sellerId, orderId } = c.req.valid("query");
 
-    return c.json({ data });
-  })
+      const data = await db
+        .select({
+          id: hair.id,
+          upc: hair.upc,
+          colour: hair.colour,
+          length: hair.length,
+          weight: hair.weight,
+          weightInStock: hair.weightInStock,
+          seller: accounts.fullName,
+          sellerId: hair.sellerId,
+          orderId: hair.orderId,
+        })
+        .from(hair)
+        .leftJoin(accounts, eq(hair.sellerId, accounts.id))
+        .leftJoin(orders, eq(hair.orderId, orders.id))
+        .where(
+          and(
+            sellerId ? eq(hair.sellerId, sellerId) : undefined,
+            orderId ? eq(hair.orderId, orderId) : undefined,
+          ),
+        );
+
+      return c.json({ data });
+    },
+  )
   .get(
     "/:id",
     clerkMiddleware(),
@@ -52,26 +73,20 @@ const app = new Hono()
         // this returns a first object from the array
         // there will be as many objects in the array as many transactions for the order
         .select({
-          id: orders.id,
-          title: orders.title,
-          total: orders.total,
-          currency: orders.currency,
-          placedAt: orders.placedAt,
-          account: accounts.fullName,
-          accountId: orders.accountId,
-          transactions: {
-            id: transactions.id,
-            amount: transactions.amount,
-            type: transactions.type,
-            currency: transactions.currency,
-            date: transactions.date,
-          },
+          id: hair.id,
+          upc: hair.upc,
+          colour: hair.colour,
+          length: hair.length,
+          weight: hair.weight,
+          weightInStock: hair.weightInStock,
+          seller: accounts.fullName,
+          sellerId: hair.sellerId,
+          orderId: hair.orderId,
         })
-        .from(orders)
-        .leftJoin(accounts, eq(orders.accountId, accounts.id))
-        .leftJoin(transactions, eq(transactions.orderId, id))
-        .orderBy(desc(orders.placedAt))
-        .where(eq(orders.id, id));
+        .from(hair)
+        .leftJoin(accounts, eq(hair.sellerId, accounts.id))
+        .leftJoin(orders, eq(hair.orderId, orders.id))
+        .where(eq(hair.id, id));
 
       if (!data) {
         return c.json({ error: "Not found" }, 404);
@@ -82,7 +97,7 @@ const app = new Hono()
   .post(
     "/",
     clerkMiddleware(),
-    zValidator("json", insertOrderSchema.omit({ id: true })),
+    zValidator("json", insertHairSchema.omit({ id: true })),
     async (c) => {
       const auth = getAuth(c);
       const values = c.req.valid("json");
@@ -91,15 +106,22 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
+      const v = { id: createId(), ...values };
+
+      console.log({ v });
+
+      // try {
       const [data] = await db
-        .insert(orders)
+        .insert(hair)
         .values({
-          id: createId(),
-          ...values,
+          ...v,
         })
         .returning();
 
       return c.json({ data });
+      // } catch (e) {
+      // console.log(e);
+      // }
     },
   )
   .patch(
@@ -111,7 +133,7 @@ const app = new Hono()
         id: z.string().optional(),
       }),
     ),
-    zValidator("json", insertOrderSchema.omit({ id: true })),
+    zValidator("json", insertHairSchema.omit({ id: true })),
     async (c) => {
       const auth = getAuth(c);
       const { id } = c.req.valid("param");
@@ -126,16 +148,10 @@ const app = new Hono()
       }
 
       const [data] = await db
-        .update(orders)
+        .update(hair)
         .set(values)
-        .where(eq(orders.id, id))
+        .where(eq(hair.id, id))
         .returning();
-
-      await db
-        .update(transactions)
-        .set({ accountId: values.accountId })
-        .where(eq(transactions.orderId, id))
-        .returning({ id: transactions.id });
 
       if (!data) {
         return c.json({ error: "Not found" }, 404);
@@ -162,10 +178,10 @@ const app = new Hono()
 
       try {
         const [data] = await db
-          .delete(orders)
-          .where(eq(orders.id, id))
-          // .where(and(eq(orders.userId, auth.userId), eq(orders.id, id)))
-          .returning({ id: orders.id });
+          .delete(hair)
+          .where(eq(hair.id, id))
+          // .where(and(eq(hair.userId, auth.userId), eq(hair.id, id)))
+          .returning({ id: hair.id });
 
         if (!data) {
           return c.json({ error: "Not found" }, 404);

@@ -3,6 +3,7 @@ import { handle } from "hono/vercel";
 import { HTTPException } from "hono/http-exception";
 import accounts from "./accounts";
 import accountTags from "./accountTags";
+import hair from "./hair";
 import orders from "./orders";
 import transactions from "./transactions";
 export const runtime = "edge";
@@ -21,6 +22,7 @@ const routes = app
   .route("/accounts", accounts)
   .route("/accountTags", accountTags)
   .route("/transactions", transactions)
+  .route("/hair", hair)
   .route("/orders", orders);
 
 export const GET = handle(app);

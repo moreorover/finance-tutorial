@@ -25,7 +25,11 @@ export function formatCurrency(value: number, currency: string | null) {
 
 export function formatDateStampString(
   timestamp: string,
-  outputFormat: string
+  outputFormat: string,
 ): string {
-  return format(new Date(timestamp), outputFormat);
+  if (timestamp && outputFormat) {
+    return format(new Date(timestamp), outputFormat);
+  }
+
+  return format(new Date(), "d MMMM yyyy");
 }
