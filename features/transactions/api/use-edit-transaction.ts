@@ -8,6 +8,10 @@ import { toast } from "sonner";
 type ResponseType = InferResponseType<
   (typeof client.api.transactions)[":id"]["$patch"]
 >;
+type ResponseType200 = InferResponseType<
+  (typeof client.api.transactions)[":id"]["$patch"],
+  200
+>;
 type RequestType = InferRequestType<
   (typeof client.api.transactions)[":id"]["$patch"]
 >["json"];
@@ -22,10 +26,13 @@ export const useEditTransaction = (id?: string) => {
       });
       return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data, variables, context) => {
       toast.success("Transaction updated");
       queryClient.invalidateQueries({ queryKey: ["transaction", { id }] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({
+        queryKey: ["order", { id: variables.orderId }],
+      });
     },
     onError: () => {
       toast.error("Failed to update transaction");

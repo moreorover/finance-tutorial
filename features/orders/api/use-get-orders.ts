@@ -16,11 +16,7 @@ export const useGetOrders = () => {
 
       return data.map((order) => ({
         ...order,
-        total: convertAmountFromMiliunits(
-          order.transactions.reduce((sum, transaction) => {
-            return sum + transaction.amount;
-          }, 0),
-        ),
+        total: convertAmountFromMiliunits(order.total),
         transactions: order.transactions.map((transaction) => ({
           ...transaction,
           amount: convertAmountFromMiliunits(transaction.amount),

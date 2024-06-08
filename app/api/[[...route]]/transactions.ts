@@ -7,7 +7,12 @@ import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 import { eq, gte, lte, and, desc } from "drizzle-orm";
 
 import { db } from "@/db/drizzle";
-import { accounts, transactions, insertTransactionSchema } from "@/db/schema";
+import {
+  accounts,
+  transactions,
+  insertTransactionSchema,
+  orders,
+} from "@/db/schema";
 
 const app = new Hono()
   .get(
@@ -126,6 +131,32 @@ const app = new Hono()
         })
         .returning();
 
+      if (!data) {
+        return c.json({ error: "Failed to create transaction" }, 500);
+      }
+
+      if (data.orderId) {
+        try {
+          const orderTransactions = await db.query.transactions.findMany({
+            columns: {
+              amount: true,
+            },
+            where: eq(transactions.orderId, data.orderId),
+          });
+
+          const orderTotal = orderTransactions.reduce((sum, transaction) => {
+            return sum + transaction.amount;
+          }, 0);
+
+          await db
+            .update(orders)
+            .set({ total: orderTotal })
+            .where(eq(orders.id, data.orderId));
+        } catch (error) {
+          return c.json({ error: "Failed to update order total" }, 500);
+        }
+      }
+
       return c.json({ data });
       // } catch (e) {
       // return c.json({ error: e }, 404);
@@ -189,6 +220,32 @@ const app = new Hono()
         return c.json({ error: "Not found" }, 404);
       }
 
+      if (!data) {
+        return c.json({ error: "Failed to create transaction" }, 500);
+      }
+
+      if (data.orderId) {
+        try {
+          const orderTransactions = await db.query.transactions.findMany({
+            columns: {
+              amount: true,
+            },
+            where: eq(transactions.orderId, data.orderId),
+          });
+
+          const orderTotal = orderTransactions.reduce((sum, transaction) => {
+            return sum + transaction.amount;
+          }, 0);
+
+          await db
+            .update(orders)
+            .set({ total: orderTotal })
+            .where(eq(orders.id, data.orderId));
+        } catch (error) {
+          return c.json({ error: "Failed to update order total" }, 500);
+        }
+      }
+
       return c.json({ data });
     },
   )
@@ -211,12 +268,35 @@ const app = new Hono()
       const [data] = await db
         .delete(transactions)
         .where(eq(transactions.id, id))
-        .returning({ id: transactions.id });
+        .returning({ id: transactions.id, orderId: transactions.orderId });
 
       if (!data) {
         return c.json({ error: "Not found" }, 404);
       }
-      return c.json({ data });
+
+      if (data && data.orderId) {
+        try {
+          const orderTransactions = await db.query.transactions.findMany({
+            columns: {
+              amount: true,
+            },
+            where: eq(transactions.orderId, data.orderId),
+          });
+
+          const orderTotal = orderTransactions.reduce((sum, transaction) => {
+            return sum + transaction.amount;
+          }, 0);
+
+          await db
+            .update(orders)
+            .set({ total: orderTotal })
+            .where(eq(orders.id, data.orderId));
+        } catch (error) {
+          return c.json({ error: "Failed to update order total" }, 500);
+        }
+      }
+
+      return c.json(data);
     },
   );
 

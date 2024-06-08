@@ -15,16 +15,9 @@ export const useGetOrder = (id?: string) => {
 
       const { data } = await response.json();
 
-      const totalTransactionAmount = data.transactions.reduce(
-        (sum, transaction) => {
-          return sum + transaction.amount;
-        },
-        0,
-      );
-
       return {
         ...data,
-        total: convertAmountFromMiliunits(totalTransactionAmount),
+        total: convertAmountFromMiliunits(data.total),
         transactions: data.transactions.map((transaction) => ({
           ...transaction,
           amount: convertAmountFromMiliunits(transaction.amount),
