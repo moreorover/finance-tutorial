@@ -56,7 +56,7 @@ export const columns: ColumnDef<ResponseType>[] = [
       return (
         <Badge
           variant={amount < 0 ? "destructive" : "primary"}
-          className="text-xs font-medium px-3.5 py-2.5"
+          className="px-3.5 py-2.5 text-xs font-medium"
         >
           {formatCurrency(amount, row.original.currency)}
         </Badge>
@@ -98,7 +98,7 @@ export const columns: ColumnDef<ResponseType>[] = [
     cell: ({ row }) => {
       return (
         <AccountColumn
-          account={row.original.account}
+          account={row.original.account?.fullName}
           accountId={row.original.accountId}
           orderId={row.original.id}
         />

@@ -18,15 +18,22 @@ const formSchema = insertHairSchema.omit({
 type FormValues = z.input<typeof formSchema>;
 
 export const NewHairSheet = () => {
-  const { isOpen, onClose } = useNewHair.useNewHair();
+  const { isOpen, onClose, sellerId, orderId } = useNewHair.useNewHair();
   const mutation = useCreateHair();
 
   const onSubmit = (values: FormValues) => {
-    mutation.mutate(values, {
-      onSuccess: () => {
-        onClose();
+    mutation.mutate(
+      {
+        ...values,
+        sellerId,
+        orderId,
       },
-    });
+      {
+        onSuccess: () => {
+          onClose();
+        },
+      },
+    );
   };
 
   return (

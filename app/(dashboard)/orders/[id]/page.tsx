@@ -16,31 +16,29 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/data-table";
 import { useNewTransaction } from "@/features/transactions/hooks/use-new-transaction";
 import { transactionColumns } from "./transaction-columns";
-import { useGetTransactions } from "@/features/transactions/api/use-get-transactions";
-import { useGetHairs } from "@/features/hair/api/use-get-hairs";
 import { useNewHair } from "@/features/hair/hooks/use-new-hair";
 import { hairColumns } from "./hair-columns";
 
 const OrderPage = ({ params }: { params: { id: string } }) => {
   const orderQuery = useGetOrder(params.id);
-  const orderHairsQuery = useGetHairs(params.id);
-  const orderTransactionsQuery = useGetTransactions(params.id);
+  // const orderHairsQuery = useGetHairs(params.id);
+  // const orderTransactionsQuery = useGetTransactions(params.id);
   const newTransaction = useNewTransaction();
   const newHair = useNewHair();
 
-  const isDisabled =
-    orderQuery.isLoading ||
-    orderTransactionsQuery.isLoading ||
-    orderHairsQuery.isLoading;
+  const isDisabled = orderQuery.isLoading;
 
-  const openTransaction = () => {
+  const openNewTransaction = () => {
     newTransaction.setOrderId(params.id);
     orderQuery.data?.accountId &&
       newTransaction.setAccountId(orderQuery.data?.accountId);
     newTransaction.onOpen();
   };
 
-  const openHair = () => {
+  const openNewHair = () => {
+    newHair.setOrderId(params.id);
+    orderQuery.data?.accountId &&
+      newHair.setSellerId(orderQuery.data?.accountId);
     newHair.onOpen();
   };
 
@@ -88,7 +86,7 @@ const OrderPage = ({ params }: { params: { id: string } }) => {
                 <CardDescription>Total</CardDescription>
                 <CardTitle className="text-4xl">
                   {formatCurrency(
-                    orderQuery.data?.total * -1,
+                    orderQuery.data?.total,
                     orderQuery.data?.currency,
                   )}
                 </CardTitle>
@@ -98,10 +96,11 @@ const OrderPage = ({ params }: { params: { id: string } }) => {
               <CardHeader className="pb-2">
                 <CardDescription>Account</CardDescription>
                 <CardTitle className="text-4xl">
+                  {/* {JSON.stringify(orderQuery.data, null, 2)} */}
                   <AccountColumn
                     orderId={orderQuery.data.id}
                     accountId={orderQuery.data?.accountId}
-                    account={orderQuery.data?.account}
+                    account={orderQuery.data?.account?.fullName || ""}
                   />
                 </CardTitle>
               </CardHeader>
@@ -115,7 +114,7 @@ const OrderPage = ({ params }: { params: { id: string } }) => {
                 </CardTitle>
                 <div className="flex items-center gap-x-2">
                   <Button
-                    onClick={openTransaction}
+                    onClick={openNewTransaction}
                     size="sm"
                     disabled={!orderQuery?.data?.accountId}
                   >
@@ -125,17 +124,15 @@ const OrderPage = ({ params }: { params: { id: string } }) => {
                 </div>
               </CardHeader>
               <CardContent>
-                <DataTable
-                  filterLabel="Type"
-                  filterKey="type"
-                  columns={transactionColumns}
-                  data={
-                    orderTransactionsQuery.data
-                      ? orderTransactionsQuery.data
-                      : []
-                  }
-                  disabled={isDisabled}
-                />
+                {orderQuery.data?.transactions && (
+                  <DataTable
+                    filterLabel="Type"
+                    filterKey="type"
+                    columns={transactionColumns}
+                    data={orderQuery.data.transactions}
+                    disabled={isDisabled}
+                  />
+                )}
               </CardContent>
             </Card>
           </div>
@@ -145,7 +142,7 @@ const OrderPage = ({ params }: { params: { id: string } }) => {
                 <CardTitle className="line-clamp-1 text-xl">Hair</CardTitle>
                 <div className="flex items-center gap-x-2">
                   <Button
-                    onClick={openHair}
+                    onClick={openNewHair}
                     size="sm"
                     disabled={!orderQuery?.data?.accountId}
                   >
@@ -155,19 +152,21 @@ const OrderPage = ({ params }: { params: { id: string } }) => {
                 </div>
               </CardHeader>
               <CardContent>
-                <DataTable
-                  filterLabel="Type"
-                  filterKey="type"
-                  columns={hairColumns}
-                  data={orderHairsQuery.data ? orderHairsQuery.data : []}
-                  disabled={isDisabled}
-                />
+                {orderQuery.data?.hair && orderQuery.data?.hair.length > 0 && (
+                  <DataTable
+                    filterLabel="Type"
+                    filterKey="type"
+                    columns={hairColumns}
+                    data={orderQuery.data?.hair}
+                    disabled={isDisabled}
+                  />
+                )}
               </CardContent>
             </Card>
           </div>
         </CardContent>
       </Card>
-      {JSON.stringify(orderHairsQuery.data, null, 2)}
+      {/* {JSON.stringify(orderQuery.data?.hair, null, 2)} */}
     </div>
   );
 };

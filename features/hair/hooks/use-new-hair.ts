@@ -1,13 +1,28 @@
 import { create } from "zustand";
 
-type NewHairState = {
+type State = {
   isOpen: boolean;
-  onOpen: () => void;
-  onClose: () => void;
+  orderId?: string;
+  sellerId?: string;
 };
 
-export const useNewHair = create<NewHairState>((set) => ({
+type Actions = {
+  onOpen: () => void;
+  onClose: () => void;
+  setOrderId: (orderId: string) => void;
+  setSellerId: (sellerId: string) => void;
+};
+
+const initialState: State = {
   isOpen: false,
+  orderId: undefined,
+  sellerId: undefined,
+};
+
+export const useNewHair = create<State & Actions>((set) => ({
+  ...initialState,
   onOpen: () => set({ isOpen: true }),
-  onClose: () => set({ isOpen: false }),
+  onClose: () => set(initialState),
+  setOrderId: (orderId: string) => set({ orderId }),
+  setSellerId: (sellerId: string) => set({ sellerId }),
 }));

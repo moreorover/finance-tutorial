@@ -74,6 +74,7 @@ export const EditTransactionSheet = () => {
   const defaultValues = transactionQuery.data
     ? {
         accountId: transactionQuery.data.accountId,
+        orderId: transactionQuery.data.orderId,
         type: transactionQuery.data.type,
         amount: transactionQuery.data.amount.toString(),
         date: transactionQuery.data.date
@@ -84,6 +85,7 @@ export const EditTransactionSheet = () => {
       }
     : {
         accountId: "",
+        orderId: null,
         type: null,
         amount: "",
         date: new Date(),

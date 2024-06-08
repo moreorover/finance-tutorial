@@ -15,16 +15,12 @@ import {
 
 import React from "react";
 import { Option } from "@/components/multiple-selector";
-import { AmountInput } from "@/components/amount-input";
-import CurrencyInput from "react-currency-input-field";
 import { SingleSelect } from "@/components/single-select";
 import { DatePicker } from "@/components/date-picker";
-import { convertAmountToMiliunits } from "@/lib/utils";
 import { insertOrderSchema } from "@/db/schema";
 
 const formSchema = z.object({
   title: z.string(),
-  total: z.string(),
   currency: z.string(),
   placedAt: z.coerce.date(),
   receivedAt: z.coerce.date().nullable(),
@@ -61,17 +57,7 @@ export const OrderForm = ({
   });
 
   const handleSubmit = (values: FormValues) => {
-    const total = parseFloat(values.total);
-    console.log({ total });
-    const amountInMiliunits =
-      total > 0
-        ? convertAmountToMiliunits(total) * -1
-        : convertAmountToMiliunits(total);
-
-    onSubmit({
-      ...values,
-      total: amountInMiliunits,
-    });
+    onSubmit(values);
   };
 
   const handleDelete = () => {
@@ -125,22 +111,6 @@ export const OrderForm = ({
           )}
         />
         <FormField
-          name="total"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Amount</FormLabel>
-              <FormControl>
-                <AmountInput
-                  {...field}
-                  disabled={disabled}
-                  placeholder="0.00"
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
           name="currency"
           control={form.control}
           render={({ field }) => (
@@ -186,7 +156,7 @@ export const OrderForm = ({
             className="w-full"
             variant="outline"
           >
-            <Trash className="size-4 mr-2" />
+            <Trash className="mr-2 size-4" />
             Delete order
           </Button>
         )}

@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 
 import { db } from "@/db/drizzle";
-import { accounts, orders, transactions, insertOrderSchema } from "@/db/schema";
+import { orders, transactions, insertOrderSchema } from "@/db/schema";
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
-import { eq, desc } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
 import { createId } from "@paralleldrive/cuid2";
 import { z } from "zod";
@@ -15,20 +15,30 @@ const app = new Hono()
     if (!auth?.userId) {
       return c.json({ error: "Unauthorized" }, 401);
     }
+    const data = await db.query.orders.findMany({
+      columns: {
+        id: true,
+        title: true,
+        total: true,
+        currency: true,
+        placedAt: true,
+        accountId: true,
+      },
+      with: {
+        account: { columns: { fullName: true } },
+        transactions: true,
+      },
+    });
 
-    const data = await db
-      .select({
-        id: orders.id,
-        title: orders.title,
-        total: orders.total,
-        currency: orders.currency,
-        placedAt: orders.placedAt,
-        account: accounts.fullName,
-        accountId: orders.accountId,
-      })
-      .from(orders)
-      .leftJoin(accounts, eq(orders.accountId, accounts.id))
-      .orderBy(desc(orders.placedAt));
+    data.forEach((order) => {
+      const totalTransactionAmount = order.transactions.reduce(
+        (sum, transaction) => {
+          return sum + transaction.amount;
+        },
+        0,
+      );
+      order.total = totalTransactionAmount;
+    });
 
     return c.json({ data });
   })
@@ -48,30 +58,14 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const [data] = await db
-        // this returns a first object from the array
-        // there will be as many objects in the array as many transactions for the order
-        .select({
-          id: orders.id,
-          title: orders.title,
-          total: orders.total,
-          currency: orders.currency,
-          placedAt: orders.placedAt,
-          account: accounts.fullName,
-          accountId: orders.accountId,
-          transactions: {
-            id: transactions.id,
-            amount: transactions.amount,
-            type: transactions.type,
-            currency: transactions.currency,
-            date: transactions.date,
-          },
-        })
-        .from(orders)
-        .leftJoin(accounts, eq(orders.accountId, accounts.id))
-        .leftJoin(transactions, eq(transactions.orderId, id))
-        .orderBy(desc(orders.placedAt))
-        .where(eq(orders.id, id));
+      const data = await db.query.orders.findFirst({
+        with: {
+          transactions: true,
+          account: true,
+          hair: true,
+        },
+        where: eq(orders.id, id),
+      });
 
       if (!data) {
         return c.json({ error: "Not found" }, 404);
@@ -82,7 +76,7 @@ const app = new Hono()
   .post(
     "/",
     clerkMiddleware(),
-    zValidator("json", insertOrderSchema.omit({ id: true })),
+    zValidator("json", insertOrderSchema.omit({ id: true, total: true })),
     async (c) => {
       const auth = getAuth(c);
       const values = c.req.valid("json");
@@ -91,15 +85,18 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const [data] = await db
-        .insert(orders)
-        .values({
-          id: createId(),
-          ...values,
-        })
-        .returning();
-
-      return c.json({ data });
+      try {
+        const [data] = await db
+          .insert(orders)
+          .values({
+            id: createId(),
+            ...values,
+          })
+          .returning();
+        return c.json({ data });
+      } catch (e) {
+        console.log(e);
+      }
     },
   )
   .patch(

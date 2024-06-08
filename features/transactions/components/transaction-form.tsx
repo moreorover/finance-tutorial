@@ -23,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 const formSchema = z.object({
   date: z.coerce.date(),
   accountId: z.string().nullable(),
+  orderId: z.string().nullable(),
   amount: z.string(),
   notes: z.string().nullable().optional(),
   type: z.enum(transactionType.enumValues).nullable(),
@@ -111,7 +112,13 @@ export const TransactionForm = ({
           name="accountId"
           control={form.control}
           render={({ field }) => (
-            <FormItem>
+            <FormItem
+              hidden={
+                defaultValues?.accountId && defaultValues?.orderId
+                  ? true
+                  : false
+              }
+            >
               <FormLabel>Account</FormLabel>
               <FormControl>
                 <SingleSelect
@@ -119,7 +126,6 @@ export const TransactionForm = ({
                   options={accountOptions}
                   value={field.value}
                   onChange={field.onChange}
-                  disabled={defaultValues?.accountId ? true : disabled}
                 />
               </FormControl>
             </FormItem>

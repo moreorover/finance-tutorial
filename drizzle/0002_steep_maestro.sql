@@ -1,1 +1,0 @@
-ALTER TABLE "orders" DROP COLUMN IF EXISTS "received_at";

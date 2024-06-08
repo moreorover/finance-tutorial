@@ -2,8 +2,8 @@ import { useOpenAccount } from "@/features/accounts/hooks/use-open-account";
 import { OrderOpenButton } from "./order-open-button";
 
 type Props = {
-  account: string | null;
-  accountId: string | null;
+  account?: string;
+  accountId?: string | null;
   orderId: string;
 };
 
@@ -18,7 +18,7 @@ export const AccountColumn = ({ account, accountId, orderId }: Props) => {
     return (
       <div
         onClick={onClick}
-        className="flex items-center cursor-pointer hover:underline"
+        className="flex cursor-pointer items-center hover:underline"
       >
         {account}
       </div>

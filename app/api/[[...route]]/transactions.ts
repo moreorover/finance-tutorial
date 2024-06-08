@@ -1,13 +1,13 @@
+import { z } from "zod";
 import { Hono } from "hono";
+import { parse, subDays } from "date-fns";
+import { createId } from "@paralleldrive/cuid2";
+import { zValidator } from "@hono/zod-validator";
+import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
+import { eq, gte, lte, and, desc } from "drizzle-orm";
 
 import { db } from "@/db/drizzle";
 import { accounts, transactions, insertTransactionSchema } from "@/db/schema";
-import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
-import { eq, inArray, gte, lte, and, desc } from "drizzle-orm";
-import { zValidator } from "@hono/zod-validator";
-import { createId } from "@paralleldrive/cuid2";
-import { z } from "zod";
-import { parse, subDays } from "date-fns";
 
 const app = new Hono()
   .get(
@@ -77,6 +77,8 @@ const app = new Hono()
         return c.json({ error: "Missing id" }, 400);
       }
 
+      console.log({ id });
+
       if (!auth?.userId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -91,6 +93,7 @@ const app = new Hono()
           date: transactions.date,
           account: accounts.fullName,
           accountId: transactions.accountId,
+          orderId: transactions.orderId,
         })
         .from(transactions)
         .leftJoin(accounts, eq(transactions.accountId, accounts.id))
@@ -105,7 +108,7 @@ const app = new Hono()
   .post(
     "/",
     clerkMiddleware(),
-    zValidator("json", insertTransactionSchema),
+    zValidator("json", insertTransactionSchema.omit({ id: true })),
     async (c) => {
       const auth = getAuth(c);
       const values = c.req.valid("json");
@@ -113,17 +116,19 @@ const app = new Hono()
       if (!auth?.userId) {
         return c.json({ error: "Unauthorized" }, 401);
       }
+
       // try {
       const [data] = await db
         .insert(transactions)
         .values({
+          id: createId(),
           ...values,
-          id: values.id && values.id.length > 0 ? values.id : createId(),
         })
         .returning();
+
       return c.json({ data });
       // } catch (e) {
-      // console.log(e);
+      // return c.json({ error: e }, 404);
       // }
     },
   )

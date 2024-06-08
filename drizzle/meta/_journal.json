@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1716842725162,
-      "tag": "0000_familiar_gambit",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1717190581315,
-      "tag": "0001_faithful_hellcat",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1717197930942,
-      "tag": "0002_steep_maestro",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1717356252850,
-      "tag": "0003_little_vivisector",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1717356387458,
-      "tag": "0004_redundant_doctor_faustus",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1717712524249,
-      "tag": "0005_tearful_meteorite",
+      "when": 1717861527536,
+      "tag": "0000_boring_blade",
       "breakpoints": true
     }
   ]

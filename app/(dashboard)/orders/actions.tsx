@@ -7,8 +7,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useDeleteTransaction } from "@/features/transactions/api/use-delete-transaction";
-import { useOpenTransaction } from "@/features/transactions/hooks/use-open-transaction";
+import { useDeleteOrder } from "@/features/orders/api/use-delete-order";
+import { useOpenOrder } from "@/features/orders/hooks/use-open-order";
 import { useConfirm } from "@/hooks/use-confirm";
 import { Edit, MoreHorizontal, Trash } from "lucide-react";
 
@@ -19,10 +19,10 @@ type Props = {
 export const Actions = ({ id }: Props) => {
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
-    "You are about to delete this account"
+    "You are about to delete this account",
   );
-  const deleteMutation = useDeleteTransaction(id);
-  const { onOpen } = useOpenTransaction();
+  const deleteMutation = useDeleteOrder(id);
+  const { onOpen } = useOpenOrder();
 
   const handleDelete = async () => {
     const ok = await confirm();
@@ -45,13 +45,13 @@ export const Actions = ({ id }: Props) => {
             disabled={deleteMutation.isPending}
             onClick={() => onOpen(id)}
           >
-            <Edit className="size-4 mr-2" /> Edit
+            <Edit className="mr-2 size-4" /> Edit
           </DropdownMenuItem>
           <DropdownMenuItem
             disabled={deleteMutation.isPending}
             onClick={handleDelete}
           >
-            <Trash className="size-4 mr-2" /> Delete
+            <Trash className="mr-2 size-4" /> Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

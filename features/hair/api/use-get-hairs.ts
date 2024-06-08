@@ -5,14 +5,14 @@ import { useSearchParams } from "next/navigation";
 export const useGetHairs = (orderId?: string) => {
   const params = useSearchParams();
   const sellerId = params.get("sellerId") || "";
-  const orderIparam = orderId ? orderId : params.get("orderId") || "";
+  const orderIdParam = orderId ? orderId : params.get("orderId") || "";
 
   const query = useQuery({
     queryKey: ["hairs"],
     queryFn: async () => {
       const response = await client.api.hair.$get({
         query: {
-          orderId: orderIparam,
+          orderId: orderIdParam,
           sellerId: sellerId,
         },
       });

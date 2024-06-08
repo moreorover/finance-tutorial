@@ -41,7 +41,7 @@ export const NewTransactionSheet = () => {
   const onSubmit = (values: FormValues) => {
     // console.table(values);
     mutation.mutate(
-      { ...values, id: "", orderId },
+      { ...values, orderId },
       {
         onSuccess: () => {
           onClose();
@@ -65,7 +65,8 @@ export const NewTransactionSheet = () => {
             onSubmit={onSubmit}
             disabled={isPending}
             defaultValues={{
-              accountId: accountId ? accountId : "",
+              accountId: accountId || "",
+              orderId: orderId || "",
               type: null,
               amount: "",
               date: new Date(),

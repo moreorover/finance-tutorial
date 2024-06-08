@@ -99,6 +99,11 @@ export const transactionsRelations = relations(transactions, ({ one }) => ({
     fields: [transactions.accountId],
     references: [accounts.id],
   }),
+  order: one(orders, {
+    fields: [transactions.orderId],
+    references: [orders.id],
+    relationName: "transactions",
+  }),
 }));
 
 export const insertTransactionSchema = createInsertSchema(transactions, {
@@ -108,7 +113,7 @@ export const insertTransactionSchema = createInsertSchema(transactions, {
 export const orders = pgTable("orders", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
-  total: integer("total").notNull(),
+  total: integer("total").notNull().default(0),
   currency: text("currency").notNull(),
   placedAt: timestamp("placed_at", { mode: "date" }).notNull(),
   accountId: text("account_id").references(() => accounts.id, {
@@ -125,7 +130,9 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
     fields: [orders.accountId],
     references: [accounts.id],
   }),
-  transactions: many(transactions),
+  transactions: many(transactions, {
+    relationName: "transactions",
+  }),
   hair: many(hair),
 }));
 
@@ -143,5 +150,16 @@ export const hair = pgTable("hair", {
     onDelete: "set null",
   }),
 });
+
+export const hairRelations = relations(hair, ({ one }) => ({
+  seller: one(accounts, {
+    fields: [hair.sellerId],
+    references: [accounts.id],
+  }),
+  orderId: one(orders, {
+    fields: [hair.orderId],
+    references: [orders.id],
+  }),
+}));
 
 export const insertHairSchema = createInsertSchema(hair);

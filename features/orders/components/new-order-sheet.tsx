@@ -56,7 +56,6 @@ export const NewOrderSheet = () => {
             defaultValues={{
               title: "",
               currency: "",
-              total: "",
               placedAt: new Date(),
               receivedAt: null,
               accountId: null,

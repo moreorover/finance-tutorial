@@ -25,14 +25,36 @@ CREATE TABLE IF NOT EXISTS "accounts" (
 	"updated_by" text
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "hair" (
+	"id" text PRIMARY KEY NOT NULL,
+	"upc" text NOT NULL,
+	"colour" text NOT NULL,
+	"length" integer NOT NULL,
+	"weight" integer NOT NULL,
+	"weight_in_stock" integer NOT NULL,
+	"seller_id" text,
+	"order_id" text,
+	CONSTRAINT "hair_upc_unique" UNIQUE("upc")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "orders" (
+	"id" text PRIMARY KEY NOT NULL,
+	"title" text NOT NULL,
+	"total" integer DEFAULT 0 NOT NULL,
+	"currency" text NOT NULL,
+	"placed_at" timestamp NOT NULL,
+	"account_id" text
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "transactions" (
 	"id" text PRIMARY KEY NOT NULL,
 	"amount" integer NOT NULL,
 	"type" "transactionType",
 	"notes" text,
-	"currency" text,
+	"currency" text NOT NULL,
 	"date" timestamp NOT NULL,
-	"account_id" text
+	"account_id" text,
+	"order_id" text
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
@@ -56,7 +78,31 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "hair" ADD CONSTRAINT "hair_seller_id_accounts_id_fk" FOREIGN KEY ("seller_id") REFERENCES "public"."accounts"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "hair" ADD CONSTRAINT "hair_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "orders" ADD CONSTRAINT "orders_account_id_accounts_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."accounts"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "transactions" ADD CONSTRAINT "transactions_account_id_accounts_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."accounts"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "transactions" ADD CONSTRAINT "transactions_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE set null ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
