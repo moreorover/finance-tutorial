@@ -7,6 +7,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, TriangleAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { HairActions } from "./hairActions";
+import { formatCurrency } from "@/lib/utils";
 
 export type ResponseType = InferResponseType<
   (typeof client.api.hair)[":id"]["$get"],
@@ -107,6 +108,31 @@ export const hairColumns: ColumnDef<ResponseType>[] = [
       return (
         <Badge variant="primary" className="px-3.5 py-2.5 text-xs font-medium">
           {row.original.weightInStock}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "price",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Price
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const price = parseFloat(row.getValue("price"));
+      return (
+        <Badge
+          variant={price < 0 ? "destructive" : "primary"}
+          className="px-3.5 py-2.5 text-xs font-medium"
+        >
+          {formatCurrency(price, null)}
         </Badge>
       );
     },

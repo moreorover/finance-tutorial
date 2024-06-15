@@ -33,3 +33,7 @@ export function formatDateStampString(
 
   return format(new Date(), "d MMMM yyyy");
 }
+
+export function convertAmountToPossitive(amount: number) {
+  return Math.abs(amount);
+}

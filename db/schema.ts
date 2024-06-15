@@ -115,6 +115,7 @@ export const orders = pgTable("orders", {
   title: text("title").notNull(),
   total: integer("total").notNull().default(0),
   currency: text("currency").notNull(),
+  requiresCalculation: boolean("requires_calculation").notNull().default(false),
   placedAt: timestamp("placed_at", { mode: "date" }).notNull(),
   accountId: text("account_id").references(() => accounts.id, {
     onDelete: "set null",
@@ -142,6 +143,8 @@ export const hair = pgTable("hair", {
   colour: text("colour").notNull(),
   length: integer("length").notNull(),
   weight: integer("weight").notNull(),
+  price: integer("price").notNull().default(0),
+  isPriceFixed: boolean("is_price_fixed").notNull().default(false),
   weightInStock: integer("weight_in_stock").notNull(),
   sellerId: text("seller_id").references(() => accounts.id, {
     onDelete: "set null",

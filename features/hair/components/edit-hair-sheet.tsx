@@ -14,6 +14,7 @@ import { Loader2 } from "lucide-react";
 import { useEditHair } from "../api/use-edit-hair";
 import { useDeleteHair } from "../api/use-delete-hair";
 import { useConfirm } from "@/hooks/use-confirm";
+import { convertAmountToPossitive } from "@/lib/utils";
 
 const formSchema = insertHairSchema.omit({ id: true });
 
@@ -34,11 +35,20 @@ export const EditHairSheet = () => {
   const isLoading = hairQuery.isLoading || hairQuery.isRefetching;
 
   const onSubmit = (values: FormValues) => {
-    editMutation.mutate(values, {
-      onSuccess: () => {
-        onClose();
+    editMutation.mutate(
+      {
+        ...values,
+        price:
+          values.isPriceFixed && values.price
+            ? convertAmountToPossitive(values.price)
+            : 0,
       },
-    });
+      {
+        onSuccess: () => {
+          onClose();
+        },
+      },
+    );
   };
 
   const onDelete = async () => {
@@ -61,6 +71,8 @@ export const EditHairSheet = () => {
         weight: hairQuery.data.weight.toString(),
         orderId: hairQuery.data.orderId,
         sellerId: hairQuery.data.sellerId,
+        price: hairQuery.data.price.toString(),
+        isPriceFixed: hairQuery.data.isPriceFixed,
       }
     : {
         upc: "",
@@ -69,6 +81,8 @@ export const EditHairSheet = () => {
         weight: "",
         orderId: null,
         sellerId: null,
+        price: "",
+        isPriceFixed: false,
       };
 
   return (

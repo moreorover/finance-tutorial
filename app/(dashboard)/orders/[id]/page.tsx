@@ -18,15 +18,15 @@ import { useNewTransaction } from "@/features/transactions/hooks/use-new-transac
 import { transactionColumns } from "./transaction-columns";
 import { useNewHair } from "@/features/hair/hooks/use-new-hair";
 import { hairColumns } from "./hair-columns";
+import { useCalculateOrder } from "@/features/orders/api/use-calculate-order";
 
 const OrderPage = ({ params }: { params: { id: string } }) => {
   const orderQuery = useGetOrder(params.id);
-  // const orderHairsQuery = useGetHairs(params.id);
-  // const orderTransactionsQuery = useGetTransactions(params.id);
   const newTransaction = useNewTransaction();
   const newHair = useNewHair();
+  const calculateMutation = useCalculateOrder(params.id);
 
-  const isDisabled = orderQuery.isLoading;
+  const isDisabled = orderQuery.isLoading || calculateMutation.isPending;
 
   const openNewTransaction = () => {
     newTransaction.setOrderId(params.id);
@@ -40,6 +40,10 @@ const OrderPage = ({ params }: { params: { id: string } }) => {
     orderQuery.data?.accountId &&
       newHair.setSellerId(orderQuery.data?.accountId);
     newHair.onOpen();
+  };
+
+  const onCalculateOrder = () => {
+    calculateMutation.mutate();
   };
 
   if (isDisabled) {
@@ -90,6 +94,20 @@ const OrderPage = ({ params }: { params: { id: string } }) => {
                     orderQuery.data?.currency,
                   )}
                 </CardTitle>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardDescription>Order discrepancy</CardDescription>
+                <CardTitle className="text-4xl">
+                  {formatCurrency(
+                    orderQuery.data?.total + orderQuery.data?.hairTotal,
+                    orderQuery.data?.currency,
+                  )}
+                </CardTitle>
+                <CardContent>
+                  <Button onClick={onCalculateOrder}>Calculate</Button>
+                </CardContent>
               </CardHeader>
             </Card>
             <Card>

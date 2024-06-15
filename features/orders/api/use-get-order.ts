@@ -22,6 +22,16 @@ export const useGetOrder = (id?: string) => {
           ...transaction,
           amount: convertAmountFromMiliunits(transaction.amount),
         })),
+        hair: data.hair.map((hair) => ({
+          ...hair,
+          price: convertAmountFromMiliunits(hair.price),
+        })),
+        hairTotal:
+          convertAmountFromMiliunits(
+            data.hair.reduce((sum, h) => {
+              return sum + h.price;
+            }, 0),
+          ) || 0,
       };
     },
   });

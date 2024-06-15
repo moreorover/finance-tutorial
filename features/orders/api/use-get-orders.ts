@@ -21,6 +21,10 @@ export const useGetOrders = () => {
           ...transaction,
           amount: convertAmountFromMiliunits(transaction.amount),
         })),
+        hair: order.hair.map((hair) => ({
+          ...hair,
+          price: convertAmountFromMiliunits(hair.price),
+        })),
       }));
     },
   });

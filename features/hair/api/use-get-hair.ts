@@ -1,4 +1,5 @@
 import { client } from "@/lib/hono";
+import { convertAmountFromMiliunits } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 
 export const useGetHair = (id?: string) => {
@@ -14,7 +15,7 @@ export const useGetHair = (id?: string) => {
 
       const { data } = await response.json();
 
-      return { ...data };
+      return { ...data, price: convertAmountFromMiliunits(data.price) };
     },
   });
 

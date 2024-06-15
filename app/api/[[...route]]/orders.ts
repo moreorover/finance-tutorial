@@ -1,12 +1,13 @@
 import { Hono } from "hono";
 
 import { db } from "@/db/drizzle";
-import { orders, transactions, insertOrderSchema } from "@/db/schema";
+import { orders, transactions, insertOrderSchema, hair } from "@/db/schema";
 import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 import { eq, sql } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
 import { createId } from "@paralleldrive/cuid2";
 import { z } from "zod";
+import { convertAmountToPossitive } from "@/lib/utils";
 
 const app = new Hono()
   .get("/", clerkMiddleware(), async (c) => {
@@ -27,17 +28,8 @@ const app = new Hono()
       with: {
         account: { columns: { fullName: true } },
         transactions: true,
+        hair: true,
       },
-    });
-
-    data.forEach((order) => {
-      const totalTransactionAmount = order.transactions.reduce(
-        (sum, transaction) => {
-          return sum + transaction.amount;
-        },
-        0,
-      );
-      order.total = totalTransactionAmount;
     });
 
     return c.json({ data });
@@ -139,6 +131,80 @@ const app = new Hono()
       }
 
       return c.json({ ...data });
+    },
+  )
+  .post(
+    "/:id/calculate",
+    clerkMiddleware(),
+    zValidator(
+      "param",
+      z.object({
+        id: z.string().optional(),
+      }),
+    ),
+    async (c) => {
+      const auth = getAuth(c);
+      const { id } = c.req.valid("param");
+
+      if (!id) {
+        return c.json({ error: "Missing id" }, 400);
+      }
+
+      if (!auth?.userId) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const data = await db.query.orders.findFirst({
+        with: {
+          transactions: true,
+          account: true,
+          hair: true,
+        },
+        where: eq(orders.id, id),
+      });
+
+      if (!data) {
+        return c.json({ error: "Not found" }, 404);
+      }
+
+      const orderTransactionsTotal =
+        data.transactions.reduce((sum, transaction) => {
+          return sum + transaction.amount;
+        }, 0) / 100;
+
+      const totalHairWeight = data.hair.reduce((sum, h) => {
+        return sum + h.weight;
+      }, 0);
+
+      const totalHairFixedPrice =
+        data.hair
+          .filter((h) => h.isPriceFixed)
+          .reduce((sum, h) => {
+            return sum + h.price;
+          }, 0) / 100;
+
+      const orderTotalUnacounted = orderTransactionsTotal + totalHairFixedPrice;
+
+      const pricePerGram = convertAmountToPossitive(
+        orderTotalUnacounted / totalHairWeight,
+      );
+
+      const updateTasks = data.hair
+        .filter((h) => !h.isPriceFixed)
+        .map(async (h) => {
+          const updatedPrice = convertAmountToPossitive(
+            Math.floor(h.weight * pricePerGram * 100),
+          );
+          return db
+            .update(hair)
+            .set({ price: updatedPrice })
+            .where(eq(hair.id, h.id));
+        });
+
+      // Execute all update tasks concurrently
+      await Promise.all(updateTasks);
+
+      return c.json({ data: { orderId: id } });
     },
   )
   .delete(

@@ -14,14 +14,18 @@ import {
 } from "@/components/ui/form";
 
 import React from "react";
-import { Option } from "@/components/multiple-selector";
 import { insertHairSchema } from "@/db/schema";
+import { convertAmountToMiliunits } from "@/lib/utils";
+import { AmountInput } from "@/components/amount-input";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   colour: z.string(),
   weight: z.string(),
   length: z.string(),
   upc: z.string(),
+  price: z.string(),
+  isPriceFixed: z.boolean(),
   sellerId: z.string().nullable(),
   orderId: z.string().nullable(),
 });
@@ -56,10 +60,13 @@ export const HairForm = ({
   const handleSubmit = (values: FormValues) => {
     const length = parseInt(values.length);
     const weight = parseInt(values.weight);
+    const price = parseFloat(values.price);
+    const priceInMillis = convertAmountToMiliunits(price);
     onSubmit({
       ...values,
       length,
       weight,
+      price: priceInMillis,
       weightInStock: weight ? weight : 0,
     });
   };
@@ -123,8 +130,53 @@ export const HairForm = ({
             </FormItem>
           )}
         />
+        <FormField
+          name="price"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Amount</FormLabel>
+              <FormControl>
+                <AmountInput
+                  {...field}
+                  disabled={disabled}
+                  placeholder="0.00"
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          name="isPriceFixed"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              {/* <FormLabel>Is Price Fixed</FormLabel> */}
+              <FormControl>
+                <div className="items-top flex space-x-2">
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                  <div className="grid gap-1.5 leading-none">
+                    <label
+                      htmlFor="terms1"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Is Price Fixed?
+                    </label>
+                    <p className="text-sm text-muted-foreground">
+                      If this is ticked, the price for the line will not be
+                      recalculated.
+                    </p>
+                  </div>
+                </div>
+              </FormControl>
+            </FormItem>
+          )}
+        />
         <Button className="w-full" disabled={disabled}>
-          {id ? "Save changes" : "Create account"}
+          {id ? "Save changes" : "Create hair"}
         </Button>
         {!!id && (
           <Button
@@ -135,7 +187,7 @@ export const HairForm = ({
             variant="outline"
           >
             <Trash className="mr-2 size-4" />
-            Delete order
+            Delete hair
           </Button>
         )}
       </form>

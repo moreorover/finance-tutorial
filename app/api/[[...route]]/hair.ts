@@ -78,6 +78,8 @@ const app = new Hono()
           colour: hair.colour,
           length: hair.length,
           weight: hair.weight,
+          price: hair.price,
+          isPriceFixed: hair.isPriceFixed,
           weightInStock: hair.weightInStock,
           seller: accounts.fullName,
           sellerId: hair.sellerId,
@@ -106,15 +108,12 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const v = { id: createId(), ...values };
-
-      console.log({ v });
-
       // try {
       const [data] = await db
         .insert(hair)
         .values({
-          ...v,
+          id: createId(),
+          ...values,
         })
         .returning();
 
@@ -181,7 +180,7 @@ const app = new Hono()
           .delete(hair)
           .where(eq(hair.id, id))
           // .where(and(eq(hair.userId, auth.userId), eq(hair.id, id)))
-          .returning({ id: hair.id });
+          .returning({ id: hair.id, orderId: hair.orderId });
 
         if (!data) {
           return c.json({ error: "Not found" }, 404);

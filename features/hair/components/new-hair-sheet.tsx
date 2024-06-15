@@ -10,6 +10,7 @@ import { HairForm } from "./hair-form";
 import { insertHairSchema } from "@/db/schema";
 import { z } from "zod";
 import { useCreateHair } from "@/features/hair/api/use-create-hair";
+import { convertAmountToPossitive } from "@/lib/utils";
 
 const formSchema = insertHairSchema.omit({
   id: true,
@@ -27,6 +28,10 @@ export const NewHairSheet = () => {
         ...values,
         sellerId,
         orderId,
+        price:
+          values.isPriceFixed && values.price
+            ? convertAmountToPossitive(values.price)
+            : 0,
       },
       {
         onSuccess: () => {
@@ -53,6 +58,8 @@ export const NewHairSheet = () => {
             weight: "",
             sellerId: null,
             orderId: null,
+            price: "",
+            isPriceFixed: false,
           }}
         />
       </SheetContent>
