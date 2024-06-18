@@ -1,0 +1,13 @@
+{
+  "body": {
+    "content": "ewoiZW1haWwiOiAibXNlbHZlbmlzQGdtYWlsLmNvbSIsCiJwYXNzd29yZCI6ICIxMjM0NTYiCn0=",
+    "file": false,
+    "fileSize": false
+  },
+  "headers": {
+    "origin": "localhost"
+  },
+  "method": "POST",
+  "title": "Sign Up",
+  "url": "http://localhost:3000"
+}

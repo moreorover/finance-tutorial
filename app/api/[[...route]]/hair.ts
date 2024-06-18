@@ -2,11 +2,11 @@ import { Hono } from "hono";
 
 import { db } from "@/db/drizzle";
 import { accounts, hair, orders, insertHairSchema } from "@/db/schema";
-import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 import { eq, and } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
 import { createId } from "@paralleldrive/cuid2";
 import { z } from "zod";
+import { validateRequest } from "@/lib/auth/validate-request";
 
 const app = new Hono()
   .get(
@@ -18,11 +18,11 @@ const app = new Hono()
         sellerId: z.string().optional(),
       }),
     ),
-    clerkMiddleware(),
-    async (c) => {
-      const auth = getAuth(c);
 
-      if (!auth?.userId) {
+    async (c) => {
+      const { user } = await validateRequest();
+
+      if (!user) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
@@ -55,17 +55,18 @@ const app = new Hono()
   )
   .get(
     "/:id",
-    clerkMiddleware(),
+
     zValidator("param", z.object({ id: z.string().optional() })),
     async (c) => {
-      const auth = getAuth(c);
       const { id } = c.req.valid("param");
 
       if (!id) {
         return c.json({ error: "Missing id" }, 400);
       }
 
-      if (!auth?.userId) {
+      const { user } = await validateRequest();
+
+      if (!user) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
@@ -98,34 +99,34 @@ const app = new Hono()
   )
   .post(
     "/",
-    clerkMiddleware(),
     zValidator("json", insertHairSchema.omit({ id: true })),
     async (c) => {
-      const auth = getAuth(c);
       const values = c.req.valid("json");
 
-      if (!auth?.userId) {
+      const { user } = await validateRequest();
+
+      if (!user) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      // try {
-      const [data] = await db
-        .insert(hair)
-        .values({
-          id: createId(),
-          ...values,
-        })
-        .returning();
+      try {
+        const [data] = await db
+          .insert(hair)
+          .values({
+            id: createId(),
+            ...values,
+          })
+          .returning();
 
-      return c.json({ data });
-      // } catch (e) {
-      // console.log(e);
-      // }
+        return c.json({ data });
+      } catch (e) {
+        return c.json({ error: "Unauthorized", message: e }, 401);
+      }
     },
   )
   .patch(
     "/:id",
-    clerkMiddleware(),
+
     zValidator(
       "param",
       z.object({
@@ -134,7 +135,6 @@ const app = new Hono()
     ),
     zValidator("json", insertHairSchema.omit({ id: true })),
     async (c) => {
-      const auth = getAuth(c);
       const { id } = c.req.valid("param");
       const values = c.req.valid("json");
 
@@ -142,7 +142,9 @@ const app = new Hono()
         return c.json({ error: "Missing id" }, 400);
       }
 
-      if (!auth?.userId) {
+      const { user } = await validateRequest();
+
+      if (!user) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
@@ -161,17 +163,18 @@ const app = new Hono()
   )
   .delete(
     "/:id",
-    clerkMiddleware(),
+
     zValidator("param", z.object({ id: z.string().optional() })),
     async (c) => {
-      const auth = getAuth(c);
       const { id } = c.req.valid("param");
 
       if (!id) {
         return c.json({ error: "Missing id" }, 400);
       }
 
-      if (!auth?.userId) {
+      const { user } = await validateRequest();
+
+      if (!user) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 

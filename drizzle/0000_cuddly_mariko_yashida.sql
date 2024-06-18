@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS "hair" (
 	"colour" text NOT NULL,
 	"length" integer NOT NULL,
 	"weight" integer NOT NULL,
+	"price" integer DEFAULT 0 NOT NULL,
+	"is_price_fixed" boolean DEFAULT false NOT NULL,
 	"weight_in_stock" integer NOT NULL,
 	"seller_id" text,
 	"order_id" text,
@@ -42,8 +44,15 @@ CREATE TABLE IF NOT EXISTS "orders" (
 	"title" text NOT NULL,
 	"total" integer DEFAULT 0 NOT NULL,
 	"currency" text NOT NULL,
+	"requires_calculation" boolean DEFAULT false NOT NULL,
 	"placed_at" timestamp NOT NULL,
 	"account_id" text
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "sessions" (
+	"id" varchar(255) PRIMARY KEY NOT NULL,
+	"user_id" varchar(21) NOT NULL,
+	"expires_at" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "transactions" (
@@ -59,9 +68,10 @@ CREATE TABLE IF NOT EXISTS "transactions" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
 	"id" text PRIMARY KEY NOT NULL,
-	"full_name" text NOT NULL,
-	"email" text NOT NULL,
-	"is_deleted" boolean DEFAULT false,
+	"email" varchar(255) NOT NULL,
+	"hashed_password" varchar(255),
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
@@ -106,3 +116,6 @@ DO $$ BEGIN
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "session_user_idx" ON "sessions" ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_email_idx" ON "users" ("email");

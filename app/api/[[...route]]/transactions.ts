@@ -3,7 +3,6 @@ import { Hono } from "hono";
 import { parse, subDays } from "date-fns";
 import { createId } from "@paralleldrive/cuid2";
 import { zValidator } from "@hono/zod-validator";
-import { clerkMiddleware, getAuth } from "@hono/clerk-auth";
 import { eq, gte, lte, and, desc } from "drizzle-orm";
 
 import { db } from "@/db/drizzle";
@@ -13,6 +12,7 @@ import {
   insertTransactionSchema,
   orders,
 } from "@/db/schema";
+import { validateRequest } from "@/lib/auth/validate-request";
 
 const app = new Hono()
   .get(
@@ -26,12 +26,12 @@ const app = new Hono()
         orderId: z.string().optional(),
       }),
     ),
-    clerkMiddleware(),
     async (c) => {
-      const auth = getAuth(c);
       const { from, to, accountId, orderId } = c.req.valid("query");
 
-      if (!auth?.userId) {
+      const { user } = await validateRequest();
+
+      if (!user) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
@@ -72,19 +72,17 @@ const app = new Hono()
   )
   .get(
     "/:id",
-    clerkMiddleware(),
     zValidator("param", z.object({ id: z.string().optional() })),
     async (c) => {
-      const auth = getAuth(c);
       const { id } = c.req.valid("param");
 
       if (!id) {
         return c.json({ error: "Missing id" }, 400);
       }
 
-      console.log({ id });
+      const { user } = await validateRequest();
 
-      if (!auth?.userId) {
+      if (!user) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
@@ -112,13 +110,13 @@ const app = new Hono()
   )
   .post(
     "/",
-    clerkMiddleware(),
     zValidator("json", insertTransactionSchema.omit({ id: true })),
     async (c) => {
-      const auth = getAuth(c);
       const values = c.req.valid("json");
 
-      if (!auth?.userId) {
+      const { user } = await validateRequest();
+
+      if (!user) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
@@ -165,13 +163,13 @@ const app = new Hono()
   )
   .post(
     "/bulk-create",
-    clerkMiddleware(),
     zValidator("json", z.array(insertTransactionSchema)),
     async (c) => {
-      const auth = getAuth(c);
       const values = c.req.valid("json");
 
-      if (!auth?.userId) {
+      const { user } = await validateRequest();
+
+      if (!user) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
@@ -189,7 +187,6 @@ const app = new Hono()
   )
   .patch(
     "/:id",
-    clerkMiddleware(),
     zValidator(
       "param",
       z.object({
@@ -198,7 +195,6 @@ const app = new Hono()
     ),
     zValidator("json", insertTransactionSchema.omit({ id: true })),
     async (c) => {
-      const auth = getAuth(c);
       const { id } = c.req.valid("param");
       const values = c.req.valid("json");
 
@@ -206,7 +202,9 @@ const app = new Hono()
         return c.json({ error: "Missing id" }, 400);
       }
 
-      if (!auth?.userId) {
+      const { user } = await validateRequest();
+
+      if (!user) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 
@@ -251,17 +249,17 @@ const app = new Hono()
   )
   .delete(
     "/:id",
-    clerkMiddleware(),
     zValidator("param", z.object({ id: z.string().optional() })),
     async (c) => {
-      const auth = getAuth(c);
       const { id } = c.req.valid("param");
 
       if (!id) {
         return c.json({ error: "Missing id" }, 400);
       }
 
-      if (!auth?.userId) {
+      const { user } = await validateRequest();
+
+      if (!user) {
         return c.json({ error: "Unauthorized" }, 401);
       }
 

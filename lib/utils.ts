@@ -1,3 +1,4 @@
+import { env } from "@/env";
 import { type ClassValue, clsx } from "clsx";
 import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
@@ -36,4 +37,8 @@ export function formatDateStampString(
 
 export function convertAmountToPossitive(amount: number) {
   return Math.abs(amount);
+}
+
+export function absoluteUrl(path: string) {
+  return new URL(path, env.NEXT_PUBLIC_APP_URL).href;
 }

@@ -5,17 +5,46 @@ import {
   pgTable,
   text,
   timestamp,
+  varchar,
+  index,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: text("id").primaryKey(),
-  fullName: text("full_name").notNull(),
-  email: text("email").notNull().unique(),
-  deleted: boolean("is_deleted").default(false),
-});
+export const users = pgTable(
+  "users",
+  {
+    id: text("id").primaryKey(),
+    email: varchar("email", { length: 255 }).unique().notNull(),
+    hashedPassword: varchar("hashed_password", { length: 255 }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(
+      () => new Date(),
+    ),
+  },
+  (t) => ({
+    emailIdx: index("user_email_idx").on(t.email),
+  }),
+);
+
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: varchar("id", { length: 255 }).primaryKey(),
+    userId: varchar("user_id", { length: 21 }).notNull(),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true,
+      mode: "date",
+    }).notNull(),
+  },
+  (t) => ({
+    userIdx: index("session_user_idx").on(t.userId),
+  }),
+);
 
 export const usersRelations = relations(users, ({ many }) => ({
   accountsCreated: many(accounts, { relationName: "createdBy" }),

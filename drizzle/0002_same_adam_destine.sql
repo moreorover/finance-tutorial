@@ -1,1 +1,0 @@
-ALTER TABLE "orders" ADD COLUMN "requires_calculation" boolean DEFAULT false NOT NULL;

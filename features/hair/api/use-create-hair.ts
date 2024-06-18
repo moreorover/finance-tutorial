@@ -14,6 +14,9 @@ export const useCreateHair = () => {
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async (json) => {
       const response = await client.api.hair.$post({ json });
+      if (!response.ok) {
+        throw new Error("Response not ok!");
+      }
       return await response.json();
     },
     onSuccess: (data) => {
