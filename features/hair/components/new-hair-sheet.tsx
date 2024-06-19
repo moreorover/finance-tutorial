@@ -10,7 +10,7 @@ import { HairForm } from "./hair-form";
 import { insertHairSchema } from "@/db/schema";
 import { z } from "zod";
 import { useCreateHair } from "@/features/hair/api/use-create-hair";
-import { convertAmountToPossitive } from "@/lib/utils";
+import { convertNumberToPossitive } from "@/lib/utils";
 
 const formSchema = insertHairSchema.omit({
   id: true,
@@ -30,7 +30,7 @@ export const NewHairSheet = () => {
         orderId,
         price:
           values.isPriceFixed && values.price
-            ? convertAmountToPossitive(values.price)
+            ? convertNumberToPossitive(values.price)
             : 0,
       },
       {

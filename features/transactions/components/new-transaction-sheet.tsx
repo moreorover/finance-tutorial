@@ -67,11 +67,10 @@ export const NewTransactionSheet = () => {
             defaultValues={{
               accountId: accountId || "",
               orderId: orderId || "",
-              type: null,
+              type: transactionType.enumValues[0],
               amount: "",
               date: new Date(),
               notes: "",
-              currency: "",
             }}
             accountOptions={accountOptions}
             typeOptions={typeOptions}

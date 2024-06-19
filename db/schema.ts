@@ -104,16 +104,15 @@ export const transactionType = pgEnum("transactionType", [
   "Direct Debit",
   "Faster payment",
   "Card payment",
-  "business-account-billing",
   "Deposit",
+  "business-account-billing",
 ]);
 
 export const transactions = pgTable("transactions", {
   id: text("id").primaryKey(),
   amount: integer("amount").notNull(),
-  type: transactionType("type"),
+  type: transactionType("type").notNull(),
   notes: text("notes"),
-  currency: text("currency").notNull(),
   date: timestamp("date", { mode: "date" }).notNull(),
   accountId: text("account_id").references(() => accounts.id, {
     onDelete: "set null",
@@ -121,6 +120,10 @@ export const transactions = pgTable("transactions", {
   orderId: text("order_id").references(() => orders.id, {
     onDelete: "set null",
   }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(
+    () => new Date(),
+  ),
 });
 
 export const transactionsRelations = relations(transactions, ({ one }) => ({
@@ -139,16 +142,22 @@ export const insertTransactionSchema = createInsertSchema(transactions, {
   date: z.coerce.date(),
 });
 
+export const orderType = pgEnum("orderType", ["Sale", "Purchase"]);
+
 export const orders = pgTable("orders", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
   total: integer("total").notNull().default(0),
-  currency: text("currency").notNull(),
+  orderType: orderType("order_type").notNull(),
   requiresCalculation: boolean("requires_calculation").notNull().default(false),
   placedAt: timestamp("placed_at", { mode: "date" }).notNull(),
   accountId: text("account_id").references(() => accounts.id, {
     onDelete: "set null",
   }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(
+    () => new Date(),
+  ),
 });
 
 export const insertOrderSchema = createInsertSchema(orders, {
@@ -181,6 +190,10 @@ export const hair = pgTable("hair", {
   orderId: text("order_id").references(() => orders.id, {
     onDelete: "set null",
   }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(
+    () => new Date(),
+  ),
 });
 
 export const hairRelations = relations(hair, ({ one }) => ({

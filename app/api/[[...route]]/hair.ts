@@ -109,24 +109,26 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      try {
-        const [data] = await db
-          .insert(hair)
-          .values({
-            id: createId(),
-            ...values,
-          })
-          .returning();
+      const [data] = await db
+        .insert(hair)
+        .values({
+          id: createId(),
+          ...values,
+        })
+        .returning();
 
-        return c.json({ data });
-      } catch (e) {
-        return c.json({ error: "Unauthorized", message: e }, 401);
+      if (values.orderId) {
+        await db
+          .update(orders)
+          .set({ requiresCalculation: true })
+          .where(eq(orders.id, values.orderId));
       }
+
+      return c.json({ data });
     },
   )
   .patch(
     "/:id",
-
     zValidator(
       "param",
       z.object({

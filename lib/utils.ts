@@ -15,10 +15,10 @@ export function convertAmountToMiliunits(amount: number) {
   return Math.round(amount * 100);
 }
 
-export function formatCurrency(value: number, currency: string | null) {
+export function formatCurrency(value: number) {
   return Intl.NumberFormat("en-GB", {
     style: "currency",
-    currency: currency ? currency : "GBP",
+    currency: "GBP",
     minimumFractionDigits: 2,
     currencyDisplay: "narrowSymbol",
   }).format(value);
@@ -35,8 +35,12 @@ export function formatDateStampString(
   return format(new Date(), "d MMMM yyyy");
 }
 
-export function convertAmountToPossitive(amount: number) {
-  return Math.abs(amount);
+export function convertNumberToPossitive(number: number) {
+  return Math.abs(number);
+}
+
+export function convertNumberToNegative(number: number) {
+  return -Math.abs(number);
 }
 
 export function absoluteUrl(path: string) {

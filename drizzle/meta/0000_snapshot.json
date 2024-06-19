@@ -1,5 +1,5 @@
 {
-  "id": "bee6477a-595a-48bb-96c4-da725ce5ea12",
+  "id": "02e9fab6-6a3e-4475-9cf3-08852aef965c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -200,6 +200,19 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -265,9 +278,10 @@
           "notNull": true,
           "default": 0
         },
-        "currency": {
-          "name": "currency",
-          "type": "text",
+        "order_type": {
+          "name": "order_type",
+          "type": "orderType",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
@@ -287,6 +301,19 @@
         "account_id": {
           "name": "account_id",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         }
@@ -367,19 +394,13 @@
           "type": "transactionType",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "notes": {
           "name": "notes",
           "type": "text",
           "primaryKey": false,
           "notNull": false
-        },
-        "currency": {
-          "name": "currency",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
         },
         "date": {
           "name": "date",
@@ -396,6 +417,19 @@
         "order_id": {
           "name": "order_id",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         }
@@ -491,6 +525,14 @@
     }
   },
   "enums": {
+    "public.orderType": {
+      "name": "orderType",
+      "schema": "public",
+      "values": [
+        "Sale",
+        "Purchase"
+      ]
+    },
     "public.transactionType": {
       "name": "transactionType",
       "schema": "public",
@@ -499,8 +541,8 @@
         "Direct Debit",
         "Faster payment",
         "Card payment",
-        "business-account-billing",
-        "Deposit"
+        "Deposit",
+        "business-account-billing"
       ]
     }
   },

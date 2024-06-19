@@ -55,9 +55,8 @@ export const NewOrderSheet = () => {
             disabled={mutation.isPending}
             defaultValues={{
               title: "",
-              currency: "",
+              orderType: "Sale",
               placedAt: new Date(),
-              receivedAt: null,
               accountId: null,
             }}
           />

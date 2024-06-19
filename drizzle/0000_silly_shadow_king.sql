@@ -1,5 +1,11 @@
 DO $$ BEGIN
- CREATE TYPE "public"."transactionType" AS ENUM('Cash', 'Direct Debit', 'Faster payment', 'Card payment', 'business-account-billing', 'Deposit');
+ CREATE TYPE "public"."orderType" AS ENUM('Sale', 'Purchase');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."transactionType" AS ENUM('Cash', 'Direct Debit', 'Faster payment', 'Card payment', 'Deposit', 'business-account-billing');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -36,6 +42,8 @@ CREATE TABLE IF NOT EXISTS "hair" (
 	"weight_in_stock" integer NOT NULL,
 	"seller_id" text,
 	"order_id" text,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp,
 	CONSTRAINT "hair_upc_unique" UNIQUE("upc")
 );
 --> statement-breakpoint
@@ -43,10 +51,12 @@ CREATE TABLE IF NOT EXISTS "orders" (
 	"id" text PRIMARY KEY NOT NULL,
 	"title" text NOT NULL,
 	"total" integer DEFAULT 0 NOT NULL,
-	"currency" text NOT NULL,
+	"order_type" "orderType" NOT NULL,
 	"requires_calculation" boolean DEFAULT false NOT NULL,
 	"placed_at" timestamp NOT NULL,
-	"account_id" text
+	"account_id" text,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "sessions" (
@@ -58,12 +68,13 @@ CREATE TABLE IF NOT EXISTS "sessions" (
 CREATE TABLE IF NOT EXISTS "transactions" (
 	"id" text PRIMARY KEY NOT NULL,
 	"amount" integer NOT NULL,
-	"type" "transactionType",
+	"type" "transactionType" NOT NULL,
 	"notes" text,
-	"currency" text NOT NULL,
 	"date" timestamp NOT NULL,
 	"account_id" text,
-	"order_id" text
+	"order_id" text,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (

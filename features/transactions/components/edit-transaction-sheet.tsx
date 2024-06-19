@@ -81,16 +81,14 @@ export const EditTransactionSheet = () => {
           ? new Date(transactionQuery.data.date)
           : new Date(),
         notes: transactionQuery.data.notes,
-        currency: transactionQuery.data.currency,
       }
     : {
         accountId: "",
         orderId: null,
-        type: null,
+        type: transactionType.enumValues[0],
         amount: "",
         date: new Date(),
         notes: "",
-        currency: "",
       };
 
   return (

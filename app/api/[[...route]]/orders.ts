@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
 import { createId } from "@paralleldrive/cuid2";
 import { z } from "zod";
-import { convertAmountToPossitive } from "@/lib/utils";
+import { convertNumberToPossitive } from "@/lib/utils";
 import { validateRequest } from "@/lib/auth/validate-request";
 
 const app = new Hono()
@@ -21,7 +21,7 @@ const app = new Hono()
         id: true,
         title: true,
         total: true,
-        currency: true,
+        orderType: true,
         placedAt: true,
         accountId: true,
       },
@@ -185,14 +185,14 @@ const app = new Hono()
 
       const orderTotalUnacounted = orderTransactionsTotal + totalHairFixedPrice;
 
-      const pricePerGram = convertAmountToPossitive(
+      const pricePerGram = convertNumberToPossitive(
         orderTotalUnacounted / totalHairWeight,
       );
 
       const updateTasks = data.hair
         .filter((h) => !h.isPriceFixed)
         .map(async (h) => {
-          const updatedPrice = convertAmountToPossitive(
+          const updatedPrice = convertNumberToPossitive(
             Math.floor(h.weight * pricePerGram * 100),
           );
           return db
@@ -203,6 +203,11 @@ const app = new Hono()
 
       // Execute all update tasks concurrently
       await Promise.all(updateTasks);
+
+      await db
+        .update(orders)
+        .set({ requiresCalculation: false })
+        .where(eq(orders.id, id));
 
       return c.json({ data: { orderId: id } });
     },

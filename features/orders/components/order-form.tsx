@@ -17,13 +17,13 @@ import React from "react";
 import { Option } from "@/components/multiple-selector";
 import { SingleSelect } from "@/components/single-select";
 import { DatePicker } from "@/components/date-picker";
-import { insertOrderSchema } from "@/db/schema";
+import { insertOrderSchema, orderType } from "@/db/schema";
+import OrderTypeToggle from "@/components/order-type-toggle";
 
 const formSchema = z.object({
   title: z.string(),
-  currency: z.string(),
+  orderType: z.enum(orderType.enumValues),
   placedAt: z.coerce.date(),
-  receivedAt: z.coerce.date().nullable(),
   accountId: z.string().nullable(),
 });
 
@@ -64,15 +64,6 @@ export const OrderForm = ({
     onDelete?.();
   };
 
-  const currencyOptions: { value: string; label: string }[] = [
-    { value: "GBP", label: "GBP" },
-    { value: "EUR", label: "EUR" },
-    { value: "USD", label: "USD" },
-    { value: "RUB", label: "RUB" },
-  ];
-
-  const defaultCurrencyOption = { value: "GBP", label: "GBP" };
-
   return (
     <Form {...form}>
       <form
@@ -93,6 +84,19 @@ export const OrderForm = ({
           )}
         />
         <FormField
+          name="orderType"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              {/* <FormLabel>Order Type</FormLabel> */}
+              <FormControl>
+                <OrderTypeToggle disabled={disabled} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
           name="accountId"
           control={form.control}
           render={({ field }) => (
@@ -102,25 +106,6 @@ export const OrderForm = ({
                 <SingleSelect
                   placeholder="Select an account"
                   options={accountOptions}
-                  value={field.value}
-                  onChange={field.onChange}
-                  disabled={disabled}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="currency"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Currency</FormLabel>
-              <FormControl>
-                <SingleSelect
-                  placeholder="Select transaction currency"
-                  options={currencyOptions}
-                  defaultOption={defaultCurrencyOption}
                   value={field.value}
                   onChange={field.onChange}
                   disabled={disabled}

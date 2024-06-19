@@ -10,7 +10,11 @@ import {
 import { Loader2, Plus } from "lucide-react";
 import { useGetOrder } from "@/features/orders/api/use-get-order";
 import { OrderOpenButton } from "./order-open-button";
-import { formatCurrency, formatDateStampString } from "@/lib/utils";
+import {
+  convertNumberToNegative,
+  formatCurrency,
+  formatDateStampString,
+} from "@/lib/utils";
 import { AccountColumn } from "./account-column";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/data-table";
@@ -19,12 +23,16 @@ import { transactionColumns } from "./transaction-columns";
 import { useNewHair } from "@/features/hair/hooks/use-new-hair";
 import { hairColumns } from "./hair-columns";
 import { useCalculateOrder } from "@/features/orders/api/use-calculate-order";
+import { redirect } from "next/navigation";
+import { Paths } from "@/lib/constants";
 
-const OrderPage = ({ params }: { params: { id: string } }) => {
+export default function OrderPage({ params }: { params: { id: string } }) {
   const orderQuery = useGetOrder(params.id);
   const newTransaction = useNewTransaction();
   const newHair = useNewHair();
   const calculateMutation = useCalculateOrder(params.id);
+
+  if (orderQuery.failureCount == 2) redirect(Paths.Orders);
 
   const isDisabled = orderQuery.isLoading || calculateMutation.isPending;
 
@@ -61,15 +69,19 @@ const OrderPage = ({ params }: { params: { id: string } }) => {
     );
   }
 
+  if (!orderQuery.data) {
+    redirect(Paths.Orders);
+  }
+
   return (
     <div className="mx-auto -mt-24 w-full max-w-screen-2xl pb-10">
       <Card className="border-none drop-shadow-sm">
         <CardHeader className="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
           <CardTitle className="line-clamp-1 text-xl">
-            {orderQuery.data?.title}
+            {orderQuery.data.title}
           </CardTitle>
           <div className="flex items-center gap-x-2">
-            <OrderOpenButton id={orderQuery.data?.id} />
+            <OrderOpenButton id={orderQuery.data.id} />
           </div>
         </CardHeader>
         <CardContent>
@@ -89,25 +101,22 @@ const OrderPage = ({ params }: { params: { id: string } }) => {
               <CardHeader className="pb-2">
                 <CardDescription>Total</CardDescription>
                 <CardTitle className="text-4xl">
-                  {formatCurrency(
-                    orderQuery.data?.total,
-                    orderQuery.data?.currency,
-                  )}
+                  {formatCurrency(orderQuery.data?.total)}
                 </CardTitle>
               </CardHeader>
             </Card>
             <Card>
               <CardHeader className="pb-2">
                 <CardDescription>Order discrepancy</CardDescription>
-                <CardTitle className="text-4xl">
+                <CardTitle className="flex flex-row justify-between text-4xl">
                   {formatCurrency(
-                    orderQuery.data?.total + orderQuery.data?.hairTotal,
-                    orderQuery.data?.currency,
+                    convertNumberToNegative(orderQuery.data?.total) +
+                      orderQuery.data?.hairTotal,
+                  )}
+                  {orderQuery.data.requiresCalculation && (
+                    <Button onClick={onCalculateOrder}>Calculate</Button>
                   )}
                 </CardTitle>
-                <CardContent>
-                  <Button onClick={onCalculateOrder}>Calculate</Button>
-                </CardContent>
               </CardHeader>
             </Card>
             <Card>
@@ -187,6 +196,4 @@ const OrderPage = ({ params }: { params: { id: string } }) => {
       {/* {JSON.stringify(orderQuery.data?.hair, null, 2)} */}
     </div>
   );
-};
-
-export default OrderPage;
+}

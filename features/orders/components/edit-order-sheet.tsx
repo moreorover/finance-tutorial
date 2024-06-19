@@ -6,7 +6,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { OrderForm } from "./order-form";
-import { insertOrderSchema } from "@/db/schema";
+import { insertOrderSchema, orderType } from "@/db/schema";
 import { z } from "zod";
 import { useOpenOrder } from "../hooks/use-open-order";
 import { useGetOrder } from "../api/use-get-order";
@@ -25,7 +25,7 @@ export const EditOrderSheet = () => {
 
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
-    "You are about to delete this transaction"
+    "You are about to delete this transaction",
   );
 
   const orderQuery = useGetOrder(id);
@@ -63,22 +63,16 @@ export const EditOrderSheet = () => {
   const defaultValues = orderQuery.data
     ? {
         title: orderQuery.data.title,
-        total: orderQuery.data.total.toString(),
-        currency: orderQuery.data.currency,
+        orderType: orderQuery.data.orderType,
         placedAt: orderQuery.data.placedAt
           ? new Date(orderQuery.data.placedAt)
           : new Date(),
-        receivedAt: orderQuery.data.receivedAt
-          ? new Date(orderQuery.data.receivedAt)
-          : null,
         accountId: orderQuery.data.accountId,
       }
     : {
         title: "",
-        total: "",
-        currency: "",
+        orderType: orderType.enumValues[0],
         placedAt: new Date(),
-        receivedAt: null,
         accountId: null,
       };
 
@@ -93,7 +87,7 @@ export const EditOrderSheet = () => {
           </SheetHeader>
           {isLoading ? (
             <div className="absolute inset-0 flex items-center justify-center">
-              <Loader2 className="size-4 text-muted-foreground animate-spin" />
+              <Loader2 className="size-4 animate-spin text-muted-foreground" />
             </div>
           ) : (
             <OrderForm

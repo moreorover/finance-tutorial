@@ -26,8 +26,7 @@ const formSchema = z.object({
   orderId: z.string().nullable(),
   amount: z.string(),
   notes: z.string().nullable().optional(),
-  type: z.enum(transactionType.enumValues).nullable(),
-  currency: z.string(),
+  type: z.enum(transactionType.enumValues),
 });
 
 const apiSchema = insertTransactionSchema.omit({
@@ -76,15 +75,6 @@ export const TransactionForm = ({
   };
 
   const isMonzo = id?.startsWith("mm_");
-
-  const currencyOptions: { value: string; label: string }[] = [
-    { value: "GBP", label: "GBP" },
-    { value: "EUR", label: "EUR" },
-    { value: "USD", label: "USD" },
-    { value: "RUB", label: "RUB" },
-  ];
-
-  const defaultCurrencyOption = currencyOptions[0];
 
   return (
     <Form {...form}>
@@ -160,25 +150,6 @@ export const TransactionForm = ({
                   {...field}
                   disabled={disabled || isMonzo}
                   placeholder="0.00"
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="currency"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Currency</FormLabel>
-              <FormControl>
-                <SingleSelect
-                  placeholder="Select transaction currency"
-                  options={currencyOptions}
-                  // defaultOption={defaultCurrencyOption}
-                  value={field.value}
-                  onChange={field.onChange}
-                  disabled={disabled || isMonzo}
                 />
               </FormControl>
             </FormItem>

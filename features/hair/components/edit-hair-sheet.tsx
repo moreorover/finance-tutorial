@@ -14,7 +14,7 @@ import { Loader2 } from "lucide-react";
 import { useEditHair } from "../api/use-edit-hair";
 import { useDeleteHair } from "../api/use-delete-hair";
 import { useConfirm } from "@/hooks/use-confirm";
-import { convertAmountToPossitive } from "@/lib/utils";
+import { convertNumberToPossitive } from "@/lib/utils";
 
 const formSchema = insertHairSchema.omit({ id: true });
 
@@ -40,7 +40,7 @@ export const EditHairSheet = () => {
         ...values,
         price:
           values.isPriceFixed && values.price
-            ? convertAmountToPossitive(values.price)
+            ? convertNumberToPossitive(values.price)
             : 0,
       },
       {

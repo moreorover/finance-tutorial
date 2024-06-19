@@ -1,6 +1,7 @@
 import { validateRequest } from "@/lib/auth/validate-request";
 import { Paths } from "@/lib/constants";
 import { redirect } from "next/navigation";
+import Dashboard from "./dashboard";
 
 export default async function Home() {
   const { user } = await validateRequest();
@@ -9,6 +10,7 @@ export default async function Home() {
   return (
     <div>
       <p>Dashboard page</p>
+      <Dashboard />
     </div>
   );
 }

@@ -6,6 +6,7 @@ export enum Paths {
   Login = "/signin",
   Signup = "/signup",
   Dashboard = "/dashboard",
+  Orders = "/orders",
   VerifyEmail = "/verify-email",
   ResetPassword = "/reset-password",
 }
