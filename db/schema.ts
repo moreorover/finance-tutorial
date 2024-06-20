@@ -178,7 +178,6 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
 export const hair = pgTable("hair", {
   id: text("id").primaryKey(),
   upc: text("upc").unique().notNull(),
-  colour: text("colour").notNull(),
   length: integer("length").notNull(),
   weight: integer("weight").notNull(),
   price: integer("price").notNull().default(0),

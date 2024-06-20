@@ -20,7 +20,6 @@ import { AmountInput } from "@/components/amount-input";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
-  colour: z.string(),
   weight: z.string(),
   length: z.string(),
   upc: z.string(),
@@ -91,18 +90,6 @@ export const HairForm = ({
                 <Input disabled={disabled} placeholder="UPC" {...field} />
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="colour"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Colour</FormLabel>
-              <FormControl>
-                <Input disabled={disabled} placeholder="Colour" {...field} />
-              </FormControl>
             </FormItem>
           )}
         />

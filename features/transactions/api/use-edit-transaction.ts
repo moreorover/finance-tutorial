@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { client } from "@/lib/hono";
 
 import { toast } from "sonner";
+import { useCalculateOrder } from "@/features/orders/api/use-calculate-order";
 
 type ResponseType = InferResponseType<
   (typeof client.api.transactions)[":id"]["$patch"]
@@ -18,6 +19,7 @@ type RequestType = InferRequestType<
 
 export const useEditTransaction = (id?: string) => {
   const queryClient = useQueryClient();
+  const calculateOrderMutation = useCalculateOrder();
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async (json) => {
       const response = await client.api.transactions[":id"]["$patch"]({
@@ -33,6 +35,11 @@ export const useEditTransaction = (id?: string) => {
       queryClient.invalidateQueries({
         queryKey: ["order", { id: variables.orderId }],
       });
+
+      const response = data as ResponseType200;
+      if (response.data.orderId) {
+        calculateOrderMutation.mutate({ param: { id: response.data.orderId } });
+      }
     },
     onError: () => {
       toast.error("Failed to update transaction");

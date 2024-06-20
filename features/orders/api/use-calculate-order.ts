@@ -5,22 +5,34 @@ import { client } from "@/lib/hono";
 
 import { toast } from "sonner";
 
+type RequestType = InferRequestType<
+  (typeof client.api.orders)[":id"]["calculate"]["$post"]
+>;
+
 type ResponseType = InferResponseType<
   (typeof client.api.orders)[":id"]["calculate"]["$post"]
 >;
 
-export const useCalculateOrder = (id?: string) => {
+type ResponseType200 = InferResponseType<
+  (typeof client.api.orders)[":id"]["calculate"]["$post"],
+  200
+>;
+
+export const useCalculateOrder = () => {
   const queryClient = useQueryClient();
-  const mutation = useMutation<ResponseType, Error>({
-    mutationFn: async () => {
+  const mutation = useMutation<ResponseType, Error, RequestType>({
+    mutationFn: async (param) => {
       const response = await client.api.orders[":id"]["calculate"]["$post"]({
-        param: { id },
+        ...param,
       });
       return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data, variables, context) => {
+      const response = data as ResponseType200;
       toast.success("Order updated");
-      queryClient.invalidateQueries({ queryKey: ["order", { id }] });
+      queryClient.invalidateQueries({
+        queryKey: ["order", { id: response.data.orderId }],
+      });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
     onError: () => {

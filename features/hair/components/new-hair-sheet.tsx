@@ -11,6 +11,7 @@ import { insertHairSchema } from "@/db/schema";
 import { z } from "zod";
 import { useCreateHair } from "@/features/hair/api/use-create-hair";
 import { convertNumberToPossitive } from "@/lib/utils";
+import { useCalculateOrder } from "@/features/orders/api/use-calculate-order";
 
 const formSchema = insertHairSchema.omit({
   id: true,
