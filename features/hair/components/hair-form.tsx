@@ -98,9 +98,14 @@ export const HairForm = ({
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Length</FormLabel>
+              <FormLabel>Length in cm</FormLabel>
               <FormControl>
-                <Input disabled={disabled} placeholder="Length" {...field} />
+                <Input
+                  type="number"
+                  disabled={disabled}
+                  placeholder="Length"
+                  {...field}
+                />
               </FormControl>
             </FormItem>
           )}
@@ -110,9 +115,14 @@ export const HairForm = ({
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Weight</FormLabel>
+              <FormLabel>Weight in grams</FormLabel>
               <FormControl>
-                <Input disabled={disabled} placeholder="Weight" {...field} />
+                <Input
+                  type="number"
+                  disabled={disabled}
+                  placeholder="Weight"
+                  {...field}
+                />
               </FormControl>
             </FormItem>
           )}

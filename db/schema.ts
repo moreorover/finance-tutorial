@@ -175,25 +175,31 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
   hair: many(hair),
 }));
 
-export const hair = pgTable("hair", {
-  id: text("id").primaryKey(),
-  upc: text("upc").unique().notNull(),
-  length: integer("length").notNull(),
-  weight: integer("weight").notNull(),
-  price: integer("price").notNull().default(0),
-  isPriceFixed: boolean("is_price_fixed").notNull().default(false),
-  weightInStock: integer("weight_in_stock").notNull(),
-  sellerId: text("seller_id").references(() => accounts.id, {
-    onDelete: "set null",
+export const hair = pgTable(
+  "hair",
+  {
+    id: text("id").primaryKey(),
+    upc: text("upc").unique().notNull(),
+    length: integer("length").notNull(),
+    weight: integer("weight").notNull(),
+    price: integer("price").notNull().default(0),
+    isPriceFixed: boolean("is_price_fixed").notNull().default(false),
+    weightInStock: integer("weight_in_stock").notNull(),
+    sellerId: text("seller_id").references(() => accounts.id, {
+      onDelete: "set null",
+    }),
+    orderId: text("order_id").references(() => orders.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(
+      () => new Date(),
+    ),
+  },
+  (t) => ({
+    hairIdx: index("hair_upc_idx").on(t.upc),
   }),
-  orderId: text("order_id").references(() => orders.id, {
-    onDelete: "set null",
-  }),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(
-    () => new Date(),
-  ),
-});
+);
 
 export const hairRelations = relations(hair, ({ one }) => ({
   seller: one(accounts, {

@@ -72,7 +72,7 @@ export default function OrderPage({ params }: { params: { id: string } }) {
       <Card className="border-none drop-shadow-sm">
         <CardHeader className="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
           <CardTitle className="line-clamp-1 text-xl">
-            {orderQuery.data.title}
+            {orderQuery.data.title} - {orderQuery.data.orderType}
           </CardTitle>
           <div className="flex items-center gap-x-2">
             <OrderOpenButton id={orderQuery.data.id} />
@@ -161,8 +161,8 @@ export default function OrderPage({ params }: { params: { id: string } }) {
               <CardContent>
                 {orderQuery.data?.hair && orderQuery.data?.hair.length > 0 && (
                   <DataTable
-                    filterLabel="Type"
-                    filterKey="type"
+                    filterLabel="UPC"
+                    filterKey="upc"
                     columns={hairColumns}
                     data={orderQuery.data?.hair}
                     disabled={isDisabled}
