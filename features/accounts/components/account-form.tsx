@@ -72,7 +72,7 @@ export const AccountForm = ({
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Full Name</FormLabel>
               <FormControl>
                 <Input disabled={disabled} placeholder="Full name" {...field} />
               </FormControl>
@@ -85,7 +85,7 @@ export const AccountForm = ({
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Last Name</FormLabel>
+              <FormLabel>Instagram</FormLabel>
               <FormControl>
                 <Input disabled={disabled} placeholder="Instagram" {...field} />
               </FormControl>
@@ -160,7 +160,7 @@ export const AccountForm = ({
             className="w-full"
             variant="outline"
           >
-            <Trash className="size-4 mr-2" />
+            <Trash className="mr-2 size-4" />
             Delete account
           </Button>
         )}

@@ -62,7 +62,6 @@ export const EditOrderSheet = () => {
 
   const defaultValues = orderQuery.data
     ? {
-        title: orderQuery.data.title,
         orderType: orderQuery.data.orderType,
         placedAt: orderQuery.data.placedAt
           ? new Date(orderQuery.data.placedAt)
@@ -70,7 +69,6 @@ export const EditOrderSheet = () => {
         accountId: orderQuery.data.accountId,
       }
     : {
-        title: "",
         orderType: orderType.enumValues[0],
         placedAt: new Date(),
         accountId: null,

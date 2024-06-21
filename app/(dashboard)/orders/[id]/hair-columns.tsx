@@ -115,7 +115,7 @@ export const hairColumns: ColumnDef<ResponseType>[] = [
           variant={price < 0 ? "destructive" : "primary"}
           className="px-3.5 py-2.5 text-xs font-medium"
         >
-          {formatCurrency(price, null)}
+          {formatCurrency(price)}
         </Badge>
       );
     },

@@ -54,7 +54,6 @@ export const NewOrderSheet = () => {
             onSubmit={onSubmit}
             disabled={mutation.isPending}
             defaultValues={{
-              title: "",
               orderType: "Sale",
               placedAt: new Date(),
               accountId: null,

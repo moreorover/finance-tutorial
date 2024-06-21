@@ -10,11 +10,7 @@ import {
 import { Loader2, Plus } from "lucide-react";
 import { useGetOrder } from "@/features/orders/api/use-get-order";
 import { OrderOpenButton } from "./order-open-button";
-import {
-  convertNumberToNegative,
-  formatCurrency,
-  formatDateStampString,
-} from "@/lib/utils";
+import { formatCurrency, formatDateStampString } from "@/lib/utils";
 import { AccountColumn } from "./account-column";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/data-table";
@@ -67,12 +63,126 @@ export default function OrderPage({ params }: { params: { id: string } }) {
     redirect(Paths.Orders);
   }
 
+  if (orderQuery.data.orderType == "Purchase") {
+    return (
+      <div className="mx-auto -mt-24 w-full max-w-screen-2xl pb-10">
+        <Card className="border-none drop-shadow-sm">
+          <CardHeader className="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
+            <CardTitle className="line-clamp-1 text-xl">
+              {orderQuery.data.orderType}
+            </CardTitle>
+            <div className="flex items-center gap-x-2">
+              <OrderOpenButton id={orderQuery.data.id} />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Placed At</CardDescription>
+                  <CardTitle className="text-4xl">
+                    {formatDateStampString(
+                      orderQuery.data?.placedAt,
+                      "d MMMM yyyy",
+                    )}
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Total</CardDescription>
+                  <CardTitle className="text-4xl">
+                    {formatCurrency(orderQuery.data?.total)}
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Account</CardDescription>
+                  <CardTitle className="text-4xl">
+                    {/* {JSON.stringify(orderQuery.data, null, 2)} */}
+                    <AccountColumn
+                      orderId={orderQuery.data.id}
+                      accountId={orderQuery.data?.accountId}
+                      account={orderQuery.data?.account?.fullName || ""}
+                    />
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+            </div>
+            <div className="mx-auto mt-4 w-full max-w-screen-2xl pb-10">
+              <Card className="border-none drop-shadow-sm">
+                <CardHeader className="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
+                  <CardTitle className="line-clamp-1 text-xl">
+                    Transactions
+                  </CardTitle>
+                  <div className="flex items-center gap-x-2">
+                    <Button
+                      onClick={openNewTransaction}
+                      size="sm"
+                      disabled={!orderQuery?.data?.accountId}
+                    >
+                      <Plus className="mr-2 size-4" />
+                      Add new
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {orderQuery.data?.transactions && (
+                    <DataTable
+                      filterLabel="Type"
+                      filterKey="type"
+                      columns={transactionColumns}
+                      data={orderQuery.data.transactions}
+                      disabled={isDisabled}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+            <div className="mx-auto mt-4 w-full max-w-screen-2xl pb-10">
+              <Card className="border-none drop-shadow-sm">
+                <CardHeader className="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
+                  <CardTitle className="line-clamp-1 text-xl">Hair</CardTitle>
+                  <div className="flex items-center gap-x-2">
+                    <Button
+                      onClick={openNewHair}
+                      size="sm"
+                      disabled={!orderQuery?.data?.accountId}
+                    >
+                      <Plus className="mr-2 size-4" />
+                      Add new
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {orderQuery.data?.hair &&
+                    orderQuery.data?.hair.length > 0 && (
+                      <DataTable
+                        filterLabel="UPC"
+                        filterKey="upc"
+                        columns={hairColumns}
+                        data={orderQuery.data?.hair}
+                        disabled={isDisabled}
+                      />
+                    )}
+                </CardContent>
+              </Card>
+            </div>
+          </CardContent>
+        </Card>
+        {/* {JSON.stringify(orderQuery.data?.hair, null, 2)} */}
+      </div>
+    );
+  }
+
+  // Following will render if orderType != Purchase
   return (
     <div className="mx-auto -mt-24 w-full max-w-screen-2xl pb-10">
       <Card className="border-none drop-shadow-sm">
         <CardHeader className="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
           <CardTitle className="line-clamp-1 text-xl">
-            {orderQuery.data.title} - {orderQuery.data.orderType}
+            {orderQuery.data.orderType}
           </CardTitle>
           <div className="flex items-center gap-x-2">
             <OrderOpenButton id={orderQuery.data.id} />

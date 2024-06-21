@@ -76,7 +76,6 @@ export const EditHairSheet = () => {
       }
     : {
         upc: "",
-        colour: "",
         length: "",
         weight: "",
         orderId: null,

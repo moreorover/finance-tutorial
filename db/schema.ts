@@ -146,7 +146,6 @@ export const orderType = pgEnum("orderType", ["Sale", "Purchase"]);
 
 export const orders = pgTable("orders", {
   id: text("id").primaryKey(),
-  title: text("title").notNull(),
   total: integer("total").notNull().default(0),
   orderType: orderType("order_type").notNull(),
   requiresCalculation: boolean("requires_calculation").notNull().default(false),

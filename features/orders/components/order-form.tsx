@@ -21,7 +21,6 @@ import { insertOrderSchema, orderType } from "@/db/schema";
 import OrderTypeToggle from "@/components/order-type-toggle";
 
 const formSchema = z.object({
-  title: z.string(),
   orderType: z.enum(orderType.enumValues),
   placedAt: z.coerce.date(),
   accountId: z.string().nullable(),
@@ -70,19 +69,6 @@ export const OrderForm = ({
         onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-4 pt-4"
       >
-        <FormField
-          name="title"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input disabled={disabled} placeholder="Title" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           name="orderType"
           control={form.control}
