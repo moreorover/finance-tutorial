@@ -1,5 +1,7 @@
 "use client";
 
+import { DataTable } from "@/components/data-table";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,28 +9,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, Plus } from "lucide-react";
-import { useGetOrder } from "@/features/orders/api/use-get-order";
-import { OrderOpenButton } from "./order-open-button";
-import { formatCurrency, formatDateStampString } from "@/lib/utils";
-import { AccountColumn } from "./account-column";
-import { Button } from "@/components/ui/button";
-import { DataTable } from "@/components/data-table";
-import { useNewTransaction } from "@/features/transactions/hooks/use-new-transaction";
-import { transactionColumns } from "./transaction-columns";
 import { useNewHair } from "@/features/hair/hooks/use-new-hair";
-import { hairColumns } from "./hair-columns";
-import { redirect } from "next/navigation";
+import { useNewHairTransaction } from "@/features/hairTransactions/hooks/use-new-hairTransaction";
+import { useGetOrder } from "@/features/orders/api/use-get-order";
+import { useNewTransaction } from "@/features/transactions/hooks/use-new-transaction";
 import { Paths } from "@/lib/constants";
+import { formatCurrency, formatDateStampString } from "@/lib/utils";
+import { Loader2, Plus } from "lucide-react";
+import { redirect } from "next/navigation";
+import { AccountColumn } from "./account-column";
+import { hairColumns } from "./hair-columns";
+import { hairTransactionColumns } from "./hairTransaction-columns";
+import { OrderOpenButton } from "./order-open-button";
+import { transactionColumns } from "./transaction-columns";
 
 export default function OrderPage({ params }: { params: { id: string } }) {
   const orderQuery = useGetOrder(params.id);
   const newTransaction = useNewTransaction();
   const newHair = useNewHair();
+  const newHairTransaction = useNewHairTransaction();
 
   if (orderQuery.failureCount == 2) redirect(Paths.Orders);
 
-  const isDisabled = orderQuery.isLoading;
+  const isDisabled = orderQuery.isLoading || orderQuery.isRefetching;
 
   const openNewTransaction = () => {
     newTransaction.setOrderId(params.id);
@@ -39,9 +42,12 @@ export default function OrderPage({ params }: { params: { id: string } }) {
 
   const openNewHair = () => {
     newHair.setOrderId(params.id);
-    orderQuery.data?.accountId &&
-      newHair.setSellerId(orderQuery.data?.accountId);
     newHair.onOpen();
+  };
+
+  const openNewHairTransaction = () => {
+    newHairTransaction.setOrderId(params.id);
+    newHairTransaction.onOpen();
   };
 
   if (isDisabled) {
@@ -259,7 +265,7 @@ export default function OrderPage({ params }: { params: { id: string } }) {
                 <CardTitle className="line-clamp-1 text-xl">Hair</CardTitle>
                 <div className="flex items-center gap-x-2">
                   <Button
-                    onClick={openNewHair}
+                    onClick={openNewHairTransaction}
                     size="sm"
                     disabled={!orderQuery?.data?.accountId}
                   >
@@ -269,15 +275,16 @@ export default function OrderPage({ params }: { params: { id: string } }) {
                 </div>
               </CardHeader>
               <CardContent>
-                {orderQuery.data?.hair && orderQuery.data?.hair.length > 0 && (
-                  <DataTable
-                    filterLabel="UPC"
-                    filterKey="upc"
-                    columns={hairColumns}
-                    data={orderQuery.data?.hair}
-                    disabled={isDisabled}
-                  />
-                )}
+                {orderQuery.data?.hairTransactions &&
+                  orderQuery.data?.hairTransactions.length > 0 && (
+                    <DataTable
+                      filterLabel="Weight"
+                      filterKey="weight"
+                      columns={hairTransactionColumns}
+                      data={orderQuery.data?.hairTransactions}
+                      disabled={isDisabled}
+                    />
+                  )}
               </CardContent>
             </Card>
           </div>

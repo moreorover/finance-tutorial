@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { InferResponseType } from "hono";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { client } from "@/lib/hono";
 
@@ -32,7 +32,7 @@ export const useDeleteHair = (id?: string) => {
       });
     },
     onError: () => {
-      toast.error("Failed to delete hair");
+      toast.error("Failed to delete order");
     },
   });
   return mutation;

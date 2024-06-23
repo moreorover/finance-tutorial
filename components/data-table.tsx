@@ -46,11 +46,11 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
-    "You are about to perform a bulk delete."
+    "You are about to perform a bulk delete.",
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [rowSelection, setRowSelection] = React.useState({});
   const table = useReactTable({
@@ -87,7 +87,7 @@ export function DataTable<TData, TValue>({
             disabled={disabled}
             size="sm"
             variant="outline"
-            className="ml-auto font-normal text-xs"
+            className="ml-auto text-xs font-normal"
             onClick={async () => {
               const ok = await confirm();
 
@@ -97,7 +97,7 @@ export function DataTable<TData, TValue>({
               }
             }}
           >
-            <Trash className="size-4 mr-2" />
+            <Trash className="mr-2 size-4" />
             Delete ({table.getFilteredSelectedRowModel().rows.length})
           </Button>
         )}
@@ -114,7 +114,7 @@ export function DataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -133,7 +133,7 @@ export function DataTable<TData, TValue>({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}

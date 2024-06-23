@@ -14,37 +14,38 @@ import {
 } from "@/components/ui/form";
 
 import React from "react";
-import { insertHairSchema } from "@/db/schema";
-import { convertAmountToMiliUnits } from "@/lib/utils";
+import { insertHairSchema, insertHairTransactionSchema } from "@/db/schema";
 import { AmountInput } from "@/components/amount-input";
-import { Checkbox } from "@/components/ui/checkbox";
+import { HairSelect } from "@/features/hair/components/hair-select";
 
 const formSchema = z.object({
+  parentHairId: z.string(),
   weight: z.string(),
-  length: z.string(),
-  upc: z.string(),
   price: z.string(),
-  isPriceFixed: z.boolean(),
-  orderId: z.string().nullable(),
+  orderId: z.string(),
 });
 
-const apiSchema = insertHairSchema.omit({
+const apiSchema = insertHairTransactionSchema.omit({
   id: true,
 });
 
 type FormValues = z.input<typeof formSchema>;
 type ApiFormValues = z.input<typeof apiSchema>;
 
+type Hair = z.infer<typeof insertHairSchema>;
+
 type Props = {
   id?: string;
+  hair: Hair[];
   defaultValues?: FormValues;
   onSubmit: (values: ApiFormValues) => void;
   onDelete?: () => void;
   disabled?: boolean;
 };
 
-export const HairForm = ({
+export const HairTransactionForm = ({
   id,
+  hair,
   defaultValues,
   onSubmit,
   onDelete,
@@ -56,21 +57,23 @@ export const HairForm = ({
   });
 
   const handleSubmit = (values: FormValues) => {
-    const length = parseInt(values.length);
     const weight = parseInt(values.weight);
-    const price = parseFloat(values.price);
-    const priceInMillis = convertAmountToMiliUnits(price);
+    const price = parseInt(values.price);
     onSubmit({
       ...values,
-      length,
       weight,
-      price: priceInMillis,
-      weightInStock: weight ? weight : 0,
+      price,
     });
   };
 
   const handleDelete = () => {
     onDelete?.();
+  };
+
+  const setMax = (value: { parentHairId: string }) => {
+    return hair
+      .filter((h) => h.id == value.parentHairId)
+      .map((h) => h.weightInStock)[0];
   };
 
   return (
@@ -80,33 +83,10 @@ export const HairForm = ({
         className="space-y-4 pt-4"
       >
         <FormField
-          name="upc"
+          name="parentHairId"
           control={form.control}
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>UPC</FormLabel>
-              <FormControl>
-                <Input disabled={disabled} placeholder="UPC" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="length"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Length in cm</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  disabled={disabled}
-                  placeholder="Length"
-                  {...field}
-                />
-              </FormControl>
-            </FormItem>
+            <HairSelect {...field} hair={hair} disabled={disabled} />
           )}
         />
         <FormField
@@ -120,6 +100,7 @@ export const HairForm = ({
                   type="number"
                   disabled={disabled}
                   placeholder="Weight"
+                  max={setMax(form.getValues())}
                   {...field}
                 />
               </FormControl>
@@ -131,42 +112,13 @@ export const HairForm = ({
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Amount</FormLabel>
+              <FormLabel>Price</FormLabel>
               <FormControl>
                 <AmountInput
                   {...field}
                   disabled={disabled}
                   placeholder="0.00"
                 />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="isPriceFixed"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              {/* <FormLabel>Is Price Fixed</FormLabel> */}
-              <FormControl>
-                <div className="items-top flex space-x-2">
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                  <div className="grid gap-1.5 leading-none">
-                    <label
-                      htmlFor="terms1"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Is Price Fixed?
-                    </label>
-                    <p className="text-sm text-muted-foreground">
-                      If this is ticked, the price for the line will not be
-                      recalculated.
-                    </p>
-                  </div>
-                </div>
               </FormControl>
             </FormItem>
           )}
@@ -183,7 +135,7 @@ export const HairForm = ({
             variant="outline"
           >
             <Trash className="mr-2 size-4" />
-            Delete hair
+            Delete hair transaction
           </Button>
         )}
       </form>

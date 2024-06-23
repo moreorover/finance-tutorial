@@ -6,7 +6,10 @@ import { eq } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
 import { createId } from "@paralleldrive/cuid2";
 import { z } from "zod";
-import { convertNumberToPossitive } from "@/lib/utils";
+import {
+  convertAmountFromMiliUnits,
+  convertNumberToPossitive,
+} from "@/lib/utils";
 import { validateRequest } from "@/lib/auth/validate-request";
 
 const app = new Hono()
@@ -19,7 +22,6 @@ const app = new Hono()
     const data = await db.query.orders.findMany({
       columns: {
         id: true,
-        title: true,
         total: true,
         orderType: true,
         placedAt: true,
@@ -29,10 +31,28 @@ const app = new Hono()
         account: { columns: { fullName: true } },
         transactions: true,
         hair: true,
+        hairTransactions: true,
       },
     });
 
-    return c.json({ data });
+    return c.json(
+      data.map((order) => ({
+        ...order,
+        total: convertAmountFromMiliUnits(order.total),
+        transactions: order.transactions.map((transaction) => ({
+          ...transaction,
+          amount: convertAmountFromMiliUnits(transaction.amount),
+        })),
+        hairTransactions: order.hairTransactions.map((transaction) => ({
+          ...transaction,
+          price: convertAmountFromMiliUnits(transaction.price),
+        })),
+        hair: order.hair.map((hair) => ({
+          ...hair,
+          price: convertAmountFromMiliUnits(hair.price),
+        })),
+      })),
+    );
   })
   .get(
     "/:id",
@@ -55,6 +75,7 @@ const app = new Hono()
           transactions: true,
           account: true,
           hair: true,
+          hairTransactions: true,
         },
         where: eq(orders.id, id),
       });
@@ -62,7 +83,29 @@ const app = new Hono()
       if (!data) {
         return c.json({ error: "Not found" }, 404);
       }
-      return c.json({ data });
+
+      return c.json({
+        ...data,
+        total: convertAmountFromMiliUnits(data.total),
+        transactions: data.transactions.map((transaction) => ({
+          ...transaction,
+          amount: convertAmountFromMiliUnits(transaction.amount),
+        })),
+        hairTransactions: data.hairTransactions.map((transaction) => ({
+          ...transaction,
+          price: convertAmountFromMiliUnits(transaction.price),
+        })),
+        hair: data.hair.map((hair) => ({
+          ...hair,
+          price: convertAmountFromMiliUnits(hair.price),
+        })),
+        hairTotal:
+          convertAmountFromMiliUnits(
+            data.hair.reduce((sum, h) => {
+              return sum + h.price;
+            }, 0),
+          ) || 0,
+      });
     },
   )
   .post(
@@ -77,18 +120,14 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      try {
-        const [data] = await db
-          .insert(orders)
-          .values({
-            id: createId(),
-            ...values,
-          })
-          .returning();
-        return c.json({ data });
-      } catch (e) {
-        console.log(e);
-      }
+      const [data] = await db
+        .insert(orders)
+        .values({
+          id: createId(),
+          ...values,
+        })
+        .returning();
+      return c.json({ data });
     },
   )
   .patch(

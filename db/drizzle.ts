@@ -14,6 +14,8 @@ import {
   ordersRelations,
   hair,
   hairRelations,
+  hairTransactions,
+  hairTransactionRelations,
 } from "@/db/schema";
 export const sql = neon(process.env.DATABASE_URL!);
 export const db = drizzle(sql, {
@@ -30,6 +32,8 @@ export const db = drizzle(sql, {
     orders,
     ordersRelations,
     hair,
-    hairRelateions: hairRelations,
+    hairRelations,
+    hairTransactions,
+    hairTransactionRelations,
   },
 });

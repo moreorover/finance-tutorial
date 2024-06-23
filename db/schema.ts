@@ -8,7 +8,7 @@ import {
   varchar,
   index,
 } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 import { z } from "zod";
 
@@ -172,6 +172,7 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
     relationName: "transactions",
   }),
   hair: many(hair),
+  hairTransactions: many(hairTransactions),
 }));
 
 export const hair = pgTable(
@@ -184,9 +185,6 @@ export const hair = pgTable(
     price: integer("price").notNull().default(0),
     isPriceFixed: boolean("is_price_fixed").notNull().default(false),
     weightInStock: integer("weight_in_stock").notNull(),
-    sellerId: text("seller_id").references(() => accounts.id, {
-      onDelete: "set null",
-    }),
     orderId: text("order_id").references(() => orders.id, {
       onDelete: "set null",
     }),
@@ -200,15 +198,49 @@ export const hair = pgTable(
   }),
 );
 
-export const hairRelations = relations(hair, ({ one }) => ({
-  seller: one(accounts, {
-    fields: [hair.sellerId],
-    references: [accounts.id],
-  }),
+export const hairRelations = relations(hair, ({ one, many }) => ({
   orderId: one(orders, {
     fields: [hair.orderId],
     references: [orders.id],
   }),
+  hairTransactions: many(hairTransactions),
 }));
 
 export const insertHairSchema = createInsertSchema(hair);
+export const selectHairSchema = createSelectSchema(hair);
+
+export const hairTransactions = pgTable("hair_transactions", {
+  id: text("id").primaryKey(),
+  parentHairId: text("parent_hair_id")
+    .references(() => hair.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
+  weight: integer("weight").notNull(),
+  price: integer("price").notNull(),
+  orderId: text("order_id")
+    .references(() => orders.id, {
+      onDelete: "set null",
+    })
+    .notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(
+    () => new Date(),
+  ),
+});
+
+export const insertHairTransactionSchema = createInsertSchema(hairTransactions);
+
+export const hairTransactionRelations = relations(
+  hairTransactions,
+  ({ one }) => ({
+    parentHair: one(hair, {
+      fields: [hairTransactions.parentHairId],
+      references: [hair.id],
+    }),
+    orderId: one(orders, {
+      fields: [hairTransactions.orderId],
+      references: [orders.id],
+    }),
+  }),
+);

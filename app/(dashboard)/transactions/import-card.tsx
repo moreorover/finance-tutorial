@@ -3,7 +3,7 @@ import { format, parse } from "date-fns";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { convertAmountToMiliunits } from "@/lib/utils";
+import { convertAmountToMiliUnits } from "@/lib/utils";
 
 import { ImportTable } from "./import-table";
 
@@ -24,7 +24,7 @@ type Props = {
 
 export const ImportCard = ({ data, onCancel, onSubmit }: Props) => {
   const [selectedColumns, setSelectedColumns] = useState<SelectedColumnsState>(
-    {}
+    {},
   );
 
   const headers = data[0];
@@ -32,7 +32,7 @@ export const ImportCard = ({ data, onCancel, onSubmit }: Props) => {
 
   const onTableHeadSelectChange = (
     columnIndex: number,
-    value: string | null
+    value: string | null,
   ) => {
     setSelectedColumns((prev) => {
       const newSelectedColumns = { ...prev };
@@ -93,7 +93,7 @@ export const ImportCard = ({ data, onCancel, onSubmit }: Props) => {
       .filter((item) => item.id.length > 0)
       .map((item) => ({
         ...item,
-        amount: convertAmountToMiliunits(parseFloat(item.amount)),
+        amount: convertAmountToMiliUnits(parseFloat(item.amount)),
         date: format(parse(item.date, dateFormat, new Date()), outputFormat),
       }));
 
@@ -101,13 +101,13 @@ export const ImportCard = ({ data, onCancel, onSubmit }: Props) => {
   };
 
   return (
-    <div className="max-w-screen-2xl mx-auto w-full pb-10 -mt-24">
+    <div className="mx-auto -mt-24 w-full max-w-screen-2xl pb-10">
       <Card className="border-none drop-shadow-sm">
         <CardHeader className="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
-          <CardTitle className="text-xl line-clamp-1">
+          <CardTitle className="line-clamp-1 text-xl">
             Import Transactions
           </CardTitle>
-          <div className="flex flex-col lg:flex-row gap-y-2 items-center gap-x-2">
+          <div className="flex flex-col items-center gap-x-2 gap-y-2 lg:flex-row">
             <Button onClick={onCancel} size="sm" className="w-full lg:w-auto">
               Cancel
             </Button>

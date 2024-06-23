@@ -13,7 +13,7 @@ import { formatCurrency } from "@/lib/utils";
 export type ResponseType = InferResponseType<
   (typeof client.api.orders)[":id"]["$get"],
   200
->["data"]["transactions"];
+>["transactions"][0];
 
 export const transactionColumns: ColumnDef<ResponseType>[] = [
   {
@@ -80,7 +80,7 @@ export const transactionColumns: ColumnDef<ResponseType>[] = [
           variant={amount < 0 ? "destructive" : "primary"}
           className="px-3.5 py-2.5 text-xs font-medium"
         >
-          {formatCurrency(amount, row.original.currency)}
+          {formatCurrency(amount)}
         </Badge>
       );
     },

@@ -2,7 +2,7 @@ import { Hono } from "hono";
 
 import { db } from "@/db/drizzle";
 import { accounts, hair, orders, insertHairSchema } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, gt } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
 import { createId } from "@paralleldrive/cuid2";
 import { z } from "zod";
@@ -15,7 +15,7 @@ const app = new Hono()
       "query",
       z.object({
         orderId: z.string().optional(),
-        sellerId: z.string().optional(),
+        inStock: z.string().optional(),
       }),
     ),
 
@@ -26,27 +26,23 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const { sellerId, orderId } = c.req.valid("query");
+      const { orderId, inStock } = c.req.valid("query");
 
       const data = await db
         .select({
           id: hair.id,
           upc: hair.upc,
-          colour: hair.colour,
           length: hair.length,
           weight: hair.weight,
           weightInStock: hair.weightInStock,
-          seller: accounts.fullName,
-          sellerId: hair.sellerId,
           orderId: hair.orderId,
         })
         .from(hair)
-        .leftJoin(accounts, eq(hair.sellerId, accounts.id))
         .leftJoin(orders, eq(hair.orderId, orders.id))
         .where(
           and(
-            sellerId ? eq(hair.sellerId, sellerId) : undefined,
             orderId ? eq(hair.orderId, orderId) : undefined,
+            inStock ? gt(hair.weightInStock, 0) : undefined,
           ),
         );
 
@@ -76,18 +72,14 @@ const app = new Hono()
         .select({
           id: hair.id,
           upc: hair.upc,
-          colour: hair.colour,
           length: hair.length,
           weight: hair.weight,
           price: hair.price,
           isPriceFixed: hair.isPriceFixed,
           weightInStock: hair.weightInStock,
-          seller: accounts.fullName,
-          sellerId: hair.sellerId,
           orderId: hair.orderId,
         })
         .from(hair)
-        .leftJoin(accounts, eq(hair.sellerId, accounts.id))
         .leftJoin(orders, eq(hair.orderId, orders.id))
         .where(eq(hair.id, id));
 

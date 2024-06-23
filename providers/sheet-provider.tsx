@@ -12,6 +12,8 @@ import { EditOrderSheet } from "@/features/orders/components/edit-order-sheet";
 import { NewOrderSheet } from "@/features/orders/components/new-order-sheet";
 import { EditHairSheet } from "@/features/hair/components/edit-hair-sheet";
 import { NewHairSheet } from "@/features/hair/components/new-hair-sheet";
+import { EditHairTransactionSheet } from "@/features/hairTransactions/components/edit-hairTransaction-sheet";
+import { NewHairTransactionSheet } from "@/features/hairTransactions/components/new-hairTransaction-sheet";
 
 export const SheetProvider = () => {
   const isMounted = useMountedState();
@@ -34,6 +36,9 @@ export const SheetProvider = () => {
 
       <EditHairSheet />
       <NewHairSheet />
+
+      <EditHairTransactionSheet />
+      <NewHairTransactionSheet />
     </>
   );
 };

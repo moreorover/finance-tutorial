@@ -13,6 +13,9 @@ export const useCreateOrder = () => {
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async (json) => {
       const response = await client.api.orders.$post({ json });
+      if (!response.ok) {
+        throw new Error("Failed to create order");
+      }
       return await response.json();
     },
     onSuccess: () => {

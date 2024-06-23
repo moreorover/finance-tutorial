@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 
 import React from "react";
-import { convertAmountToMiliunits } from "@/lib/utils";
+import { convertAmountToMiliUnits } from "@/lib/utils";
 import { DatePicker } from "@/components/date-picker";
 import { SingleSelect } from "@/components/single-select";
 import { AmountInput } from "@/components/amount-input";
@@ -62,7 +62,7 @@ export const TransactionForm = ({
 
   const handleSubmit = (values: FormValues) => {
     const amount = parseFloat(values.amount);
-    const amountInMiliunits = convertAmountToMiliunits(amount);
+    const amountInMiliunits = convertAmountToMiliUnits(amount);
 
     onSubmit({
       ...values,

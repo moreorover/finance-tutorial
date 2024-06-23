@@ -1,12 +1,12 @@
 "use client";
 
+import { DataTable } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useGetOrders } from "@/features/orders/api/use-get-orders";
 import { useNewOrder } from "@/features/orders/hooks/use-new-order";
 import { Loader2, Plus } from "lucide-react";
 import { columns } from "./columns";
-import { DataTable } from "@/components/data-table";
-import { useGetOrders } from "@/features/orders/api/use-get-orders";
 
 const Orders = () => {
   const newOrder = useNewOrder();

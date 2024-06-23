@@ -3,7 +3,7 @@ import { Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { insertTransactionSchema, transactionType } from "../../../db/schema";
 import { z } from "zod";
-import { convertAmountToMiliunits } from "@/lib/utils";
+import { convertAmountToMiliUnits } from "@/lib/utils";
 
 type Props = {
   onUpload: (results: z.infer<typeof insertTransactionSchema>[]) => void;
@@ -34,7 +34,7 @@ export const MonzoUploadButton = ({ onUpload }: Props) => {
   function validateHeader(actualHeaders: string[]) {
     if (headersExpected.length !== actualHeaders.length) {
       console.error(
-        `Headers do not match in length. Expected ${headersExpected.length}, but got ${actualHeaders.length}.`
+        `Headers do not match in length. Expected ${headersExpected.length}, but got ${actualHeaders.length}.`,
       );
       return false;
     }
@@ -42,7 +42,7 @@ export const MonzoUploadButton = ({ onUpload }: Props) => {
     for (let i = 0; i < headersExpected.length; i++) {
       if (headersExpected[i] !== actualHeaders[i]) {
         console.error(
-          `Headers do not match at index ${i}. Expected '${headersExpected[i]}', but got '${actualHeaders[i]}'.`
+          `Headers do not match at index ${i}. Expected '${headersExpected[i]}', but got '${actualHeaders[i]}'.`,
         );
         return false;
       }
@@ -59,7 +59,7 @@ export const MonzoUploadButton = ({ onUpload }: Props) => {
 
     if (!match) {
       console.error(
-        `Date '${dateString}' does not match the expected format dd/MM/yyyy.`
+        `Date '${dateString}' does not match the expected format dd/MM/yyyy.`,
       );
       return false;
     }
@@ -96,7 +96,7 @@ export const MonzoUploadButton = ({ onUpload }: Props) => {
 
     if (!match) {
       console.error(
-        `Time '${timeString}' does not match the expected format HH:MM:SS.`
+        `Time '${timeString}' does not match the expected format HH:MM:SS.`,
       );
       return false;
     }
@@ -109,21 +109,21 @@ export const MonzoUploadButton = ({ onUpload }: Props) => {
     // Check if the hours, minutes, and seconds are valid
     if (hours < 0 || hours > 23) {
       console.error(
-        `Hours '${hours}' are out of range in time '${timeString}'.`
+        `Hours '${hours}' are out of range in time '${timeString}'.`,
       );
       return false;
     }
 
     if (minutes < 0 || minutes > 59) {
       console.error(
-        `Minutes '${minutes}' are out of range in time '${timeString}'.`
+        `Minutes '${minutes}' are out of range in time '${timeString}'.`,
       );
       return false;
     }
 
     if (seconds < 0 || seconds > 59) {
       console.error(
-        `Seconds '${seconds}' are out of range in time '${timeString}'.`
+        `Seconds '${seconds}' are out of range in time '${timeString}'.`,
       );
       return false;
     }
@@ -144,7 +144,7 @@ export const MonzoUploadButton = ({ onUpload }: Props) => {
 
     // Create an ISO 8601 datetime string
     const isoString = `${year}-${String(month).padStart(2, "0")}-${String(
-      day
+      day,
     ).padStart(2, "0")}T${timeString}`;
 
     // Create a Date object from the ISO string
@@ -166,7 +166,7 @@ export const MonzoUploadButton = ({ onUpload }: Props) => {
       (r: string[]) =>
         r[0].startsWith("mm_") &&
         validateDateFormat(r[1]) &&
-        validateTimeFormat(r[2])
+        validateTimeFormat(r[2]),
     );
     filterResult.forEach((fr) => makeNote(fr));
 
@@ -185,7 +185,7 @@ export const MonzoUploadButton = ({ onUpload }: Props) => {
         id,
         date: createDateFromStrings(r[1], r[2]),
         type,
-        amount: convertAmountToMiliunits(Number(amount)),
+        amount: convertAmountToMiliUnits(Number(amount)),
         currency,
         notes,
       });

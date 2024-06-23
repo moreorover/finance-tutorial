@@ -7,11 +7,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function convertAmountFromMiliunits(amount: number) {
+export function convertAmountFromMiliUnits(amount: number) {
   return amount / 100;
 }
 
-export function convertAmountToMiliunits(amount: number) {
+export function convertAmountToMiliUnits(amount: number) {
   return Math.round(amount * 100);
 }
 

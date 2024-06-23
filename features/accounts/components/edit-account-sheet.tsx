@@ -37,7 +37,7 @@ export const EditAccountSheet = () => {
 
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
-    "You are about to delete this transaction"
+    "You are about to delete this transaction",
   );
 
   const accountQuery = useGetAccount(id);
@@ -55,14 +55,16 @@ export const EditAccountSheet = () => {
     editMutation.mutate(values, {
       onSuccess: () => {
         const mappedTagIds = values.tags.map((tag) => tag.value);
-        updateAccountTagsMutation.mutate(
-          { tagIds: mappedTagIds },
-          {
-            onSuccess: () => {
-              onClose();
+        mappedTagIds.length > 0 &&
+          updateAccountTagsMutation.mutate(
+            { tagIds: mappedTagIds },
+            {
+              onSuccess: () => {
+                onClose();
+              },
             },
-          }
-        );
+          );
+        onClose();
       },
     });
   };
@@ -110,7 +112,7 @@ export const EditAccountSheet = () => {
           </SheetHeader>
           {isLoading ? (
             <div className="absolute inset-0 flex items-center justify-center">
-              <Loader2 className="size-4 text-muted-foreground animate-spin" />
+              <Loader2 className="size-4 animate-spin text-muted-foreground" />
             </div>
           ) : (
             <AccountForm

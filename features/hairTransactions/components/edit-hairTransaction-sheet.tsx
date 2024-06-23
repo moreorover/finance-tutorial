@@ -5,31 +5,33 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { HairForm } from "./hair-form";
-import { insertHairSchema } from "@/db/schema";
+import { HairTransactionForm } from "./hairTransaction-form";
+import { insertHairTransactionSchema } from "@/db/schema";
 import { z } from "zod";
-import { useOpenHair } from "../hooks/use-open-hair";
-import { useGetHair } from "../api/use-get-hair";
+import { useOpenHairTransaction } from "../hooks/use-open-hairTransaction";
+import { useGetHairTransaction } from "../api/use-get-hairTransaction";
 import { Loader2 } from "lucide-react";
-import { useEditHair } from "../api/use-edit-hair";
+import { useEditHairTransaction } from "../api/use-edit-hairTransaction";
 import { useDeleteHair } from "../api/use-delete-hair";
 import { useConfirm } from "@/hooks/use-confirm";
-import { convertNumberToPossitive } from "@/lib/utils";
+import { useGetHairs } from "@/features/hair/api/use-get-hairs";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
-const formSchema = insertHairSchema.omit({ id: true });
+const formSchema = insertHairTransactionSchema.omit({ id: true });
 
 type FormValues = z.input<typeof formSchema>;
 
-export const EditHairSheet = () => {
-  const { isOpen, onClose, id } = useOpenHair();
+export const EditHairTransactionSheet = () => {
+  const { isOpen, onClose, id } = useOpenHairTransaction();
+  const hairsQuery = useGetHairs();
 
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",
     "You are about to delete this transaction",
   );
 
-  const hairQuery = useGetHair(id);
-  const editMutation = useEditHair(id);
+  const hairQuery = useGetHairTransaction(id);
+  const editMutation = useEditHairTransaction(id);
   const deleteMutation = useDeleteHair(id);
   const isPending = editMutation.isPending || deleteMutation.isPending;
   const isLoading = hairQuery.isLoading || hairQuery.isRefetching;
@@ -38,10 +40,6 @@ export const EditHairSheet = () => {
     editMutation.mutate(
       {
         ...values,
-        price:
-          values.isPriceFixed && values.price
-            ? convertNumberToPossitive(values.price)
-            : 0,
       },
       {
         onSuccess: () => {
@@ -65,21 +63,32 @@ export const EditHairSheet = () => {
 
   const defaultValues = hairQuery.data
     ? {
-        upc: hairQuery.data.upc,
-        length: hairQuery.data.length.toString(),
         weight: hairQuery.data.weight.toString(),
         orderId: hairQuery.data.orderId,
         price: hairQuery.data.price.toString(),
-        isPriceFixed: hairQuery.data.isPriceFixed,
+        parentHairId: hairQuery.data.parentHairId,
       }
     : {
-        upc: "",
-        length: "",
         weight: "",
-        orderId: null,
+        orderId: "",
         price: "",
-        isPriceFixed: false,
+        parentHairId: "",
       };
+
+  if (!hairsQuery.data) {
+    return (
+      <div className="mx-auto -mt-24 w-full max-w-screen-2xl pb-10">
+        <Card className="border-none drop-shadow-sm">
+          <CardHeader className="h-8 w-48"></CardHeader>
+          <CardContent>
+            <div className="flex h-[500px] w-full items-center justify-center">
+              <Loader2 className="size-6 animate-spin text-slate-300" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -87,20 +96,23 @@ export const EditHairSheet = () => {
       <Sheet open={isOpen} onOpenChange={onClose}>
         <SheetContent className="space-y-4">
           <SheetHeader>
-            <SheetTitle>Edit Hair</SheetTitle>
-            <SheetDescription>Edit an existing hair.</SheetDescription>
+            <SheetTitle>Edit Hair Transaction</SheetTitle>
+            <SheetDescription>
+              Edit an existing hair transaction.
+            </SheetDescription>
           </SheetHeader>
           {isLoading ? (
             <div className="absolute inset-0 flex items-center justify-center">
               <Loader2 className="size-4 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <HairForm
+            <HairTransactionForm
               id={id}
               onSubmit={onSubmit}
               disabled={isPending}
               defaultValues={defaultValues}
               onDelete={() => onDelete()}
+              hair={hairsQuery.data}
             />
           )}
         </SheetContent>

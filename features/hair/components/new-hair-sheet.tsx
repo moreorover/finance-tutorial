@@ -19,14 +19,13 @@ const formSchema = insertHairSchema.omit({
 type FormValues = z.input<typeof formSchema>;
 
 export const NewHairSheet = () => {
-  const { isOpen, onClose, sellerId, orderId } = useNewHair.useNewHair();
+  const { isOpen, onClose, orderId } = useNewHair.useNewHair();
   const mutation = useCreateHair();
 
   const onSubmit = (values: FormValues) => {
     mutation.mutate(
       {
         ...values,
-        sellerId,
         orderId,
         price:
           values.isPriceFixed && values.price
@@ -55,7 +54,6 @@ export const NewHairSheet = () => {
             upc: "",
             length: "",
             weight: "",
-            sellerId: null,
             orderId: null,
             price: "",
             isPriceFixed: false,

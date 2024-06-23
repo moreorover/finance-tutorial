@@ -16,7 +16,7 @@ const initialState: State = {
   orderId: undefined,
 };
 
-export const useNewHair = create<State & Actions>((set) => ({
+export const useNewHairTransaction = create<State & Actions>((set) => ({
   ...initialState,
   onOpen: () => set({ isOpen: true }),
   onClose: () => set(initialState),

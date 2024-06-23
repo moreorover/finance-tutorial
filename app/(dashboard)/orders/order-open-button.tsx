@@ -20,7 +20,7 @@ export const OrderOpenButton = ({ id }: Props) => {
         disabled={deleteMutation.isPending}
         onClick={() => onOpen(id)}
       >
-        <MoveUpRight className="size-4 mr-2" /> Unassigned
+        <MoveUpRight className="mr-2 size-4" /> Unassigned
       </Button>
     </>
   );
