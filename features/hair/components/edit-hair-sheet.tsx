@@ -5,16 +5,16 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { HairForm } from "./hair-form";
 import { insertHairSchema } from "@/db/schema";
-import { z } from "zod";
-import { useOpenHair } from "../hooks/use-open-hair";
-import { useGetHair } from "../api/use-get-hair";
-import { Loader2 } from "lucide-react";
-import { useEditHair } from "../api/use-edit-hair";
-import { useDeleteHair } from "../api/use-delete-hair";
 import { useConfirm } from "@/hooks/use-confirm";
 import { convertNumberToPossitive } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
+import { z } from "zod";
+import { useDeleteHair } from "../api/use-delete-hair";
+import { useEditHair } from "../api/use-edit-hair";
+import { useGetHair } from "../api/use-get-hair";
+import { useOpenHair } from "../hooks/use-open-hair";
+import { HairForm } from "./hair-form";
 
 const formSchema = insertHairSchema.omit({ id: true });
 

@@ -22,9 +22,7 @@ export const useGetHairs = (orderId?: string, inStock?: "true") => {
         throw new Error("Failed to fetch hair");
       }
 
-      const { data } = await response.json();
-
-      return data;
+      return await response.json();
     },
   });
 

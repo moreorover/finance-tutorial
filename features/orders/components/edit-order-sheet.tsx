@@ -5,22 +5,26 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { OrderForm } from "./order-form";
 import { insertOrderSchema, orderType } from "@/db/schema";
-import { z } from "zod";
-import { useOpenOrder } from "../hooks/use-open-order";
-import { useGetOrder } from "../api/use-get-order";
-import { Loader2 } from "lucide-react";
-import { useEditOrder } from "../api/use-edit-order";
-import { useDeleteOrder } from "../api/use-delete-order";
 import { useConfirm } from "@/hooks/use-confirm";
-import { useGetAccounts } from "@/features/accounts/api/use-get-accounts";
+import { Loader2 } from "lucide-react";
+import { z } from "zod";
+import { useDeleteOrder } from "../api/use-delete-order";
+import { useEditOrder } from "../api/use-edit-order";
+import { useGetOrder } from "../api/use-get-order";
+import { useOpenOrder } from "../hooks/use-open-order";
+import { OrderForm } from "./order-form";
+import { useGetAccountsQueryType } from "@/lib/query-types";
 
 const formSchema = insertOrderSchema.omit({ id: true });
 
 type FormValues = z.input<typeof formSchema>;
 
-export const EditOrderSheet = () => {
+type Props = {
+  accountsQuery: useGetAccountsQueryType;
+};
+
+export const EditOrderSheet = ({ accountsQuery }: Props) => {
   const { isOpen, onClose, id } = useOpenOrder();
 
   const [ConfirmDialog, confirm] = useConfirm(
@@ -31,7 +35,6 @@ export const EditOrderSheet = () => {
   const orderQuery = useGetOrder(id);
   const editMutation = useEditOrder(id);
   const deleteMutation = useDeleteOrder(id);
-  const accountsQuery = useGetAccounts();
   const isPending = editMutation.isPending || deleteMutation.isPending;
   const isLoading = orderQuery.isLoading || accountsQuery.isLoading;
 

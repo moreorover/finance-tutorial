@@ -1,12 +1,13 @@
 import { Hono } from "hono";
 
 import { db } from "@/db/drizzle";
-import { accounts, hair, orders, insertHairSchema } from "@/db/schema";
-import { eq, and, gt } from "drizzle-orm";
+import { hair, insertHairSchema, orders } from "@/db/schema";
+import { validateRequest } from "@/lib/auth/validate-request";
+import { convertAmountFromMiliUnits } from "@/lib/utils";
 import { zValidator } from "@hono/zod-validator";
 import { createId } from "@paralleldrive/cuid2";
+import { and, eq, gt } from "drizzle-orm";
 import { z } from "zod";
-import { validateRequest } from "@/lib/auth/validate-request";
 
 const app = new Hono()
   .get(
@@ -28,25 +29,33 @@ const app = new Hono()
 
       const { orderId, inStock } = c.req.valid("query");
 
-      const data = await db
-        .select({
-          id: hair.id,
-          upc: hair.upc,
-          length: hair.length,
-          weight: hair.weight,
-          weightInStock: hair.weightInStock,
-          orderId: hair.orderId,
-        })
-        .from(hair)
-        .leftJoin(orders, eq(hair.orderId, orders.id))
-        .where(
-          and(
-            orderId ? eq(hair.orderId, orderId) : undefined,
-            inStock ? gt(hair.weightInStock, 0) : undefined,
-          ),
-        );
+      const data = await db.query.hair.findMany({
+        with: {
+          orderId: true,
+          hairTransactions: true,
+        },
+        where: and(
+          orderId ? eq(hair.orderId, orderId) : undefined,
+          inStock ? gt(hair.weightInStock, 0) : undefined,
+        ),
+      });
 
-      return c.json({ data });
+      return c.json(
+        data.map((hair) => ({
+          ...hair,
+          price: convertAmountFromMiliUnits(hair.price),
+          orderId: hair.orderId
+            ? {
+                ...hair.orderId,
+                total: convertAmountFromMiliUnits(hair.orderId.total),
+              }
+            : null,
+          hairTransactions: hair.hairTransactions.map((transaction) => ({
+            ...transaction,
+            price: convertAmountFromMiliUnits(transaction.price),
+          })),
+        })),
+      );
     },
   )
   .get(
@@ -66,27 +75,32 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const [data] = await db
-        // this returns a first object from the array
-        // there will be as many objects in the array as many transactions for the order
-        .select({
-          id: hair.id,
-          upc: hair.upc,
-          length: hair.length,
-          weight: hair.weight,
-          price: hair.price,
-          isPriceFixed: hair.isPriceFixed,
-          weightInStock: hair.weightInStock,
-          orderId: hair.orderId,
-        })
-        .from(hair)
-        .leftJoin(orders, eq(hair.orderId, orders.id))
-        .where(eq(hair.id, id));
+      const data = await db.query.hair.findFirst({
+        with: {
+          orderId: true,
+          hairTransactions: true,
+        },
+        where: eq(hair.id, id),
+      });
 
       if (!data) {
         return c.json({ error: "Not found" }, 404);
       }
-      return c.json({ data });
+
+      return c.json({
+        ...data,
+        price: convertAmountFromMiliUnits(data.price),
+        orderId: data.orderId
+          ? {
+              ...data.orderId,
+              total: convertAmountFromMiliUnits(data.orderId.total),
+            }
+          : null,
+        hairTransactions: data.hairTransactions.map((transaction) => ({
+          ...transaction,
+          price: convertAmountFromMiliUnits(transaction.price),
+        })),
+      });
     },
   )
   .post(

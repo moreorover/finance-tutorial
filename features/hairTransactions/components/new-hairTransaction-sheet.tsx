@@ -1,3 +1,4 @@
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Sheet,
   SheetContent,
@@ -5,14 +6,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import * as useNewHairTransaction from "@/features/hairTransactions/hooks/use-new-hairTransaction";
-import { HairTransactionForm } from "./hairTransaction-form";
 import { insertHairTransactionSchema } from "@/db/schema";
-import { z } from "zod";
 import { useCreateHairTransaction } from "@/features/hairTransactions/api/use-create-hairTransaction";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import * as useNewHairTransaction from "@/features/hairTransactions/hooks/use-new-hairTransaction";
+import { useGetHairsQueryType } from "@/lib/query-types";
 import { Loader2 } from "lucide-react";
-import { useGetHairs } from "@/features/hair/api/use-get-hairs";
+import { z } from "zod";
+import { HairTransactionForm } from "./hairTransaction-form";
 
 const formSchema = insertHairTransactionSchema.omit({
   id: true,
@@ -21,10 +21,13 @@ const formSchema = insertHairTransactionSchema.omit({
 
 type FormValues = z.input<typeof formSchema>;
 
-export const NewHairTransactionSheet = () => {
+type Props = {
+  hairInStock: useGetHairsQueryType;
+};
+
+export const NewHairTransactionSheet = ({ hairInStock }: Props) => {
   const { isOpen, onClose, orderId } =
     useNewHairTransaction.useNewHairTransaction();
-  const hairInStock = useGetHairs();
   const mutation = useCreateHairTransaction();
 
   const isLoading = hairInStock.isLoading || hairInStock.isRefetching;

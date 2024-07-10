@@ -1,5 +1,4 @@
 import { client } from "@/lib/hono";
-import { convertAmountFromMiliUnits } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 
 export const useGetHair = (id?: string) => {
@@ -13,9 +12,7 @@ export const useGetHair = (id?: string) => {
         throw new Error("Failed to fetch order");
       }
 
-      const { data } = await response.json();
-
-      return { ...data, price: convertAmountFromMiliUnits(data.price) };
+      return await response.json();
     },
   });
 

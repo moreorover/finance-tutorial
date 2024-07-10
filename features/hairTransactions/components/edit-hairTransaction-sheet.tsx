@@ -16,14 +16,18 @@ import { useDeleteHair } from "../api/use-delete-hair";
 import { useConfirm } from "@/hooks/use-confirm";
 import { useGetHairs } from "@/features/hair/api/use-get-hairs";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useGetHairsQueryType } from "@/lib/query-types";
 
 const formSchema = insertHairTransactionSchema.omit({ id: true });
 
 type FormValues = z.input<typeof formSchema>;
 
-export const EditHairTransactionSheet = () => {
+type Props = {
+  hairsQuery: useGetHairsQueryType;
+}
+
+export const EditHairTransactionSheet = ({hairsQuery}: Props) => {
   const { isOpen, onClose, id } = useOpenHairTransaction();
-  const hairsQuery = useGetHairs();
 
   const [ConfirmDialog, confirm] = useConfirm(
     "Are you sure?",

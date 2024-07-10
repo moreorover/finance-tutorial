@@ -5,13 +5,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import * as useNewOrder from "@/features/orders/hooks/use-new-order";
-import { OrderForm } from "./order-form";
 import { insertOrderSchema } from "@/db/schema";
-import { z } from "zod";
 import { useCreateOrder } from "@/features/orders/api/use-create-order";
-import { useGetAccounts } from "@/features/accounts/api/use-get-accounts";
+import * as useNewOrder from "@/features/orders/hooks/use-new-order";
 import { Loader2 } from "lucide-react";
+import { z } from "zod";
+import { OrderForm } from "./order-form";
+import { useGetAccountsQueryType } from "@/lib/query-types";
 
 const formSchema = insertOrderSchema.omit({
   id: true,
@@ -19,9 +19,12 @@ const formSchema = insertOrderSchema.omit({
 
 type FormValues = z.input<typeof formSchema>;
 
-export const NewOrderSheet = () => {
+type Props = {
+  accountsQuery: useGetAccountsQueryType;
+};
+
+export const NewOrderSheet = ({ accountsQuery }: Props) => {
   const { isOpen, onClose } = useNewOrder.useNewOrder();
-  const accountsQuery = useGetAccounts();
   const mutation = useCreateOrder();
   const isLoading = accountsQuery.isLoading;
 

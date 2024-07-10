@@ -11,10 +11,10 @@ import { Loader2 } from "lucide-react";
 import { useConfirm } from "@/hooks/use-confirm";
 import { useOpenTransaction } from "../hooks/use-open-transaction";
 import { insertTransactionSchema, transactionType } from "@/db/schema";
-import { useGetAccounts } from "@/features/accounts/api/use-get-accounts";
 import { useEditTransaction } from "../api/use-edit-transaction";
 import { useGetTransaction } from "../api/use-get-transaction";
 import { useDeleteTransaction } from "../api/use-delete-transaction";
+import { useGetAccountsQueryType } from "@/lib/query-types";
 
 const formSchema = insertTransactionSchema.omit({
   id: true,
@@ -22,7 +22,11 @@ const formSchema = insertTransactionSchema.omit({
 
 type FormValues = z.input<typeof formSchema>;
 
-export const EditTransactionSheet = () => {
+type Props = {
+  accountsQuery: useGetAccountsQueryType;
+};
+
+export const EditTransactionSheet = ({accountsQuery}: Props) => {
   const { isOpen, onClose, id } = useOpenTransaction();
 
   const [ConfirmDialog, confirm] = useConfirm(
@@ -31,7 +35,6 @@ export const EditTransactionSheet = () => {
   );
 
   const transactionQuery = useGetTransaction(id);
-  const accountsQuery = useGetAccounts();
   const editMutation = useEditTransaction(id);
   const deleteMutation = useDeleteTransaction(id);
   const isPending = editMutation.isPending || deleteMutation.isPending;

@@ -5,23 +5,26 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import * as useNewTransactions from "@/features/transactions/hooks/use-new-transaction";
-import { TransactionForm } from "./transaction-form";
 import { insertTransactionSchema, transactionType } from "@/db/schema";
-import { z } from "zod";
 import { useCreateTransaction } from "@/features/transactions/api/use-create-transaction";
-import { useGetAccounts } from "@/features/accounts/api/use-get-accounts";
+import * as useNewTransactions from "@/features/transactions/hooks/use-new-transaction";
+import { useGetAccountsQueryType } from "@/lib/query-types";
 import { Loader2 } from "lucide-react";
+import { z } from "zod";
+import { TransactionForm } from "./transaction-form";
 
 const formSchema = insertTransactionSchema.omit({ id: true });
 
 type FormValues = z.input<typeof formSchema>;
 
-export const NewTransactionSheet = () => {
+type Props = {
+  accountsQuery: useGetAccountsQueryType;
+};
+
+export const NewTransactionSheet = ({ accountsQuery }: Props) => {
   const { isOpen, orderId, onClose, accountId } =
     useNewTransactions.useNewTransaction();
 
-  const accountsQuery = useGetAccounts();
   const isLoading = accountsQuery.isLoading;
 
   const accountOptions = (accountsQuery.data ?? []).map((account) => ({
